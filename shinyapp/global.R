@@ -1,8 +1,8 @@
 library(dplyr)
 
 # 	# TODO to-be-automatized, best via a database; then delete raw data from repo
-unfaelle = read.csv("../data/ms_unfaelle.csv")
-locations = read.csv("../data/geolocator.result.csv", col.names = c("id", "latitude", "longitude"), header = FALSE)
+unfaelle = read.csv("data/ms_unfaelle.csv")
+locations = read.csv("data/geolocator.result.csv", col.names = c("id", "latitude", "longitude"), header = FALSE)
 accidents = merge(x = unfaelle, y = locations, by = "id", all.y = TRUE)
 accidents = accidents[1:200,]
 

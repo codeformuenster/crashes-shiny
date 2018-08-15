@@ -5,8 +5,6 @@ server <- function(input, output, session) {
   
 	accidents_filtered <- reactive({
 	  
-	  print(input$hit_and_run)
-	  
 	  filtered <- accidents
 		
 	  # involved vehicles
@@ -35,10 +33,10 @@ server <- function(input, output, session) {
 	  # hit and run?
 	  if (input$hit_and_run == "yes") {
 			filtered <- filtered %>% 
-				filter(accidents$flucht == TRUE)
+				filter(flucht == TRUE)
 		} else if (input$hit_and_run == "no") {
-				filtered <- filtered %>% 
-				  filter(accidents$flucht == FALSE)
+			filtered <- filtered %>% 
+			  filter(flucht == FALSE)
 		}
 	  
 		return(filtered)
