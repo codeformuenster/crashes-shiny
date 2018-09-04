@@ -7,6 +7,7 @@ ui <- navbarPage("Münsteraner Verkehrsunfälle", id = "nav",
    tabPanel("Interaktive Karte",
             div(h5("instabile development Version, Finger weg!")),
             leafletOutput("karte"),
+            textOutput("number_of_accidents"),
    				 	wellPanel(
    				 	  column(2,
 					   				 selectizeInput(
