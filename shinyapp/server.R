@@ -1,7 +1,5 @@
 library(shiny)
 
-Sys.setenv(DB_HOST = "localhost")
-
 # Define server logic required to draw the map
 server <- function(input, output, session) {
 
