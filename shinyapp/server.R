@@ -20,15 +20,15 @@ server <- function(input, output, session) {
     return(ifelse(is.na(as.numeric(text)), 0, as.numeric(text)))
   }
 
-  accidents_filtered <- eventReactive(input$QueryBtn, ignoreNULL=FALSE, {
-
+  accidents_filtered <- eventReactive(input$QueryBtn, ignoreNULL = FALSE, {
+    # filter involved vehicles
+    
     pedfilter <- 0
     bikefilter <- 0
     carfilter <- 0
     truckfilter <- 0
     restfilter <- 0
 
-    # involved vehicles
     if ("ped" %in% input$vehicles) {
       pedfilter <- 1
     }
@@ -44,21 +44,40 @@ server <- function(input, output, session) {
     if ("rest" %in% input$vehicles) {
       restfilter <- 1
     }
+    
+    # filter injuries
+    
+    slightlyfilter <- 0
+    seriouslyfilter <- 0
+    deadfilter <- 0
+    
+    if ("slightly" %in% input$injured) {
+      slightlyfilter <- 1
+    }
+    if ("seriously" %in% input$injured) {
+      seriouslyfilter <- 1
+    }
+    if ("dead" %in% input$injured) {
+      deadfilter <- 1
+    }
 
     sql_string <- paste0("SELECT unfalldaten_raw.*,",
-                          " st_x(the_geom) as longitude, st_y(the_geom) as latitude",
-                          " FROM unfalldaten_raw",
-                          " JOIN unfalldaten_geometries on unfalldaten_raw.id = unfalldaten_geometries.unfall_id",
-                          " WHERE REGEXP_REPLACE(COALESCE(fg, '0'), '[^0-9]*' ,'0')::integer >= ", pedfilter,
-                          " AND REGEXP_REPLACE(COALESCE(rf, '0'), '[^0-9]*' ,'0')::integer >= ", bikefilter,
-                          " AND REGEXP_REPLACE(COALESCE(pkw, '0'), '[^0-9]*' ,'0')::integer >= ", carfilter,
-                          " AND REGEXP_REPLACE(COALESCE(lkw, '0'), '[^0-9]*' ,'0')::integer >= ", truckfilter,
-                          " AND (REGEXP_REPLACE(COALESCE(mofa, '0'), '[^0-9]*' ,'0')::integer) ",
-                          "   + (REGEXP_REPLACE(COALESCE(kkr, '0'), '[^0-9]*' ,'0')::integer) ",
-                          "   + (REGEXP_REPLACE(COALESCE(krad, '0'), '[^0-9]*' ,'0')::integer) ",
-                          "   + (REGEXP_REPLACE(COALESCE(kom, '0'), '[^0-9]*' ,'0')::integer) ",
-                          "   + (REGEXP_REPLACE(COALESCE(sonstige, '0'), '[^0-9]*' ,'0')::integer) >= ",truckfilter,
-                          " LIMIT 200;")
+                         " st_x(the_geom) as longitude, st_y(the_geom) as latitude",
+                         " FROM unfalldaten_raw",
+                         " JOIN unfalldaten_geometries on unfalldaten_raw.id = unfalldaten_geometries.unfall_id",
+                         " WHERE REGEXP_REPLACE(COALESCE(fg, '0'), '[^0-9]*' ,'0')::integer >= ", pedfilter,
+                         " AND REGEXP_REPLACE(COALESCE(rf, '0'), '[^0-9]*' ,'0')::integer >= ", bikefilter,
+                         " AND REGEXP_REPLACE(COALESCE(pkw, '0'), '[^0-9]*' ,'0')::integer >= ", carfilter,
+                         " AND REGEXP_REPLACE(COALESCE(lkw, '0'), '[^0-9]*' ,'0')::integer >= ", truckfilter,
+                         " AND ((REGEXP_REPLACE(COALESCE(mofa, '0'), '[^0-9]*' ,'0')::integer) ",
+                         "   + (REGEXP_REPLACE(COALESCE(kkr, '0'), '[^0-9]*' ,'0')::integer) ",
+                         "   + (REGEXP_REPLACE(COALESCE(krad, '0'), '[^0-9]*' ,'0')::integer) ",
+                         "   + (REGEXP_REPLACE(COALESCE(kom, '0'), '[^0-9]*' ,'0')::integer) ",
+                         "   + (REGEXP_REPLACE(COALESCE(sonstige, '0'), '[^0-9]*' ,'0')::integer)) >= ", restfilter,
+                         " AND REGEXP_REPLACE(COALESCE(lv, '0'), '[^0-9]*' ,'0')::integer >=", slightlyfilter,
+                         " AND REGEXP_REPLACE(COALESCE(sv, '0'), '[^0-9]*' ,'0')::integer >=", seriouslyfilter,
+                         " AND REGEXP_REPLACE(COALESCE(t, '0'), '[^0-9]*' ,'0')::integer >=", deadfilter,
+                          " LIMIT 20000;")
 
     print(sql_string)
 
@@ -125,19 +144,19 @@ server <- function(input, output, session) {
         addMarkers(lng = ~longitude,
                    lat = ~latitude,
                    popup = paste0(accidents_filtered()$tag,
-                                 ",", accidents_filtered()$datum,
-                                 ",", accidents_filtered()$uhrzeit,
+                                 ", ", accidents_filtered()$datum,
+                                 ", ", accidents_filtered()$uhrzeit,
                                  ", id: ",  accidents_filtered()$id,
                                  ", ", accidents_filtered()$vu_ort,
                                  " ", accidents_filtered()$vu_hoehe,
                                  ",\nTote: ",  accidents_filtered()$t,
                                  ", Schwerverletzte: ",  accidents_filtered()$sv,
                                  ", Leichtverletzte: ",  accidents_filtered()$lv,
-                                 ", PKW: ", accidents_filtered()$pkw,
+                                 ",\nPKW: ", accidents_filtered()$pkw,
                                  ", LKW: ", accidents_filtered()$lkw,
                                  ", Fußgänger: ", accidents_filtered()$fg,
                                  ", Fahrräder: ", accidents_filtered()$rf,
-                                 ", sonstige: ", accidents_filtered()$mofa +
+                                 ", sonstige Verkehrsmittel : ", accidents_filtered()$mofa +
                                    accidents_filtered()$kkr +
                                    accidents_filtered()$krad +
                                    accidents_filtered()$sonstige),

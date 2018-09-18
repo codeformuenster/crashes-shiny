@@ -5,7 +5,7 @@ library(leaflet.extras)
 ui <- navbarPage("Münsteraner Verkehrsunfälle", id = "nav",
                  
    tabPanel("Interaktive Karte",
-            div(h5("instabile development Version, Finger weg!")),
+            div(h5("Beta-Version, Feedback willkommen!")),
             leafletOutput("karte"),
             textOutput("number_of_accidents"),
    				 	wellPanel(
@@ -13,18 +13,31 @@ ui <- navbarPage("Münsteraner Verkehrsunfälle", id = "nav",
 					   				 selectizeInput(
 														"vehicles",
 														"Unfallbeteiligte?",
-														selected = c("car"),
 														choices = c("Fuß" = "ped", "Rad" = "bike", "PKW" = "car", "LKW" = "truck", "sonstiges" = "rest"),
-														multiple = TRUE, options = list(
+														selected = c("car"),
+														multiple = TRUE, 
+														options = list(
 														  'plugins' = list('remove_button'))
 														)
-   				 		),
+					   				 ),
+   				 	  column(2,
+   				 		       selectizeInput(
+   				 		         "injured",
+   				 		         "Verletzte",
+   				 		         choices = c("Leichtverletzte" = "slightly", "Schwerverletzte" = "seriously", "Tote" = "dead"),
+   				 		         selected = c("seriously"),
+   				 		         multiple = TRUE,
+   				 		         options = list(
+														  'plugins' = list('remove_button')
+														  )
+   				 		         )
+   				 		       ),
    				 		column(2,
    				 					 selectizeInput(
 											"hit_and_run",
 											"Fahrerflucht?",
+											choices = c("ja" = "yes", "nein" = "no", "egal" = "all"),
 											selected = "all",
-											choices = c("ja" = "yes", "nein" = "no", "egal" = "all"), 
 											multiple = FALSE, options = list(
 											  'plugins' = list('remove_button'))
 											)
