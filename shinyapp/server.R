@@ -20,7 +20,7 @@ server <- function(input, output, session) {
     return(ifelse(is.na(as.numeric(text)), 0, as.numeric(text)))
   }
 
-  accidents_filtered <- reactive({
+  accidents_filtered <- eventReactive(input$QueryBtn, ignoreNULL=FALSE, {
 
     pedfilter <- 0
     bikefilter <- 0
@@ -58,7 +58,7 @@ server <- function(input, output, session) {
                           "   + (REGEXP_REPLACE(COALESCE(krad, '0'), '[^0-9]*' ,'0')::integer) ",
                           "   + (REGEXP_REPLACE(COALESCE(kom, '0'), '[^0-9]*' ,'0')::integer) ",
                           "   + (REGEXP_REPLACE(COALESCE(sonstige, '0'), '[^0-9]*' ,'0')::integer) >= ",truckfilter,
-                          " LIMIT 2000;")
+                          " LIMIT 200;")
 
     print(sql_string)
 
@@ -93,7 +93,6 @@ server <- function(input, output, session) {
     }
 
     return(filtered)
-    dbDisconnect(db_con)
   })
 
   # LEAFLET -----------------------------------------------------------------

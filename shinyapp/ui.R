@@ -29,6 +29,9 @@ ui <- navbarPage("Münsteraner Verkehrsunfälle", id = "nav",
 											  'plugins' = list('remove_button'))
 											)
    				 		)
+   				 	),
+   				 	wellPanel(
+   				 	  actionButton("QueryBtn", "Aktualisieren", icon = icon("refresh"))
    				 	)
     ),
            
