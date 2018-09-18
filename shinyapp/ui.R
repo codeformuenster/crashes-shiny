@@ -31,17 +31,17 @@ ui <- navbarPage("Münsteraner Verkehrsunfälle", id = "nav",
 														  'plugins' = list('remove_button')
 														  )
    				 		         )
-   				 		       ),
-   				 		column(2,
-   				 					 selectizeInput(
-											"hit_and_run",
-											"Fahrerflucht?",
-											choices = c("ja" = "yes", "nein" = "no", "egal" = "all"),
-											selected = "all",
-											multiple = FALSE, options = list(
-											  'plugins' = list('remove_button'))
-											)
-   				 		)
+   				 		       )#,
+#    				 		column(2,
+#    				 					 selectizeInput(
+# 											"hit_and_run",
+# 											"Fahrerflucht?",
+# 											choices = c("ja" = "yes", "nein" = "no", "egal" = "all"),
+# 											selected = "all",
+# 											multiple = FALSE, options = list(
+# 											  'plugins' = list('remove_button'))
+# 											)
+#    				 		)
    				 	),
    				 	wellPanel(
    				 	  actionButton("QueryBtn", "Aktualisieren", icon = icon("refresh"))

@@ -1,5 +1,7 @@
 library(shiny)
 
+Sys.setenv(DB_HOST = "localhost")
+
 # Define server logic required to draw the map
 server <- function(input, output, session) {
 
@@ -61,6 +63,15 @@ server <- function(input, output, session) {
       deadfilter <- 1
     }
 
+    # TODO hit and run?
+    # if (input$hit_and_run == "yes") {
+    #   filtered <- filtered %>%
+    #     filter(flucht == TRUE)
+    # } else if (input$hit_and_run == "no") {
+    #   filtered <- filtered %>%
+    #     filter(flucht == FALSE)
+    # }
+
     sql_string <- paste0("SELECT unfalldaten_raw.*,",
                          " st_x(the_geom) as longitude, st_y(the_geom) as latitude",
                          " FROM unfalldaten_raw",
@@ -76,23 +87,14 @@ server <- function(input, output, session) {
                          "   + (REGEXP_REPLACE(COALESCE(sonstige, '0'), '[^0-9]*' ,'0')::integer)) >= ", restfilter,
                          " AND REGEXP_REPLACE(COALESCE(lv, '0'), '[^0-9]*' ,'0')::integer >=", slightlyfilter,
                          " AND REGEXP_REPLACE(COALESCE(sv, '0'), '[^0-9]*' ,'0')::integer >=", seriouslyfilter,
-                         " AND REGEXP_REPLACE(COALESCE(t, '0'), '[^0-9]*' ,'0')::integer >=", deadfilter,
-                          " LIMIT 20000;")
+                         " AND REGEXP_REPLACE(COALESCE(t, '0'), '[^0-9]*' ,'0')::integer >=", deadfilter) # ,
+                        #" LIMIT 20000;")
 
     print(sql_string)
 
     filtered <- dbGetQuery(db_con, sql_string)
 
     print(head(filtered))
-
-    # hit and run?
-    if (input$hit_and_run == "yes") {
-      filtered <- filtered %>%
-        filter(flucht == TRUE)
-    } else if (input$hit_and_run == "no") {
-      filtered <- filtered %>%
-        filter(flucht == FALSE)
-    }
 
     if (nrow(filtered) > 0) {
 
@@ -140,7 +142,7 @@ server <- function(input, output, session) {
       map <- leaflet(data = accidents_to_plot) %>%
         setView(lat = 51.96, lng = 7.62, zoom = 12) %>%
         addProviderTiles(provider = "Esri.WorldImagery", group = "Terrain") %>%
-        addProviderTiles(provider = "OpenStreetMap.BlackAndWhite", group = "OSM (B & W)") %>%
+        addProviderTiles(provider = "CartoDB.Positron", group = "schematisch") %>%
         addMarkers(lng = ~longitude,
                    lat = ~latitude,
                    popup = paste0(accidents_filtered()$tag,
@@ -168,11 +170,11 @@ server <- function(input, output, session) {
         ### Groups
         hideGroup("Markers") %>%
         hideGroup("Terrain") %>%
-        showGroup("OSM (B & W)") %>%
+        showGroup("schematisch)") %>%
         # Layers control
         addLayersControl(
           baseGroups = c("Terrain",
-                         "OSM (B & W)"),
+                         "schematisch"),
           overlayGroups = visualization_options,
           options = layersControlOptions(collapsed = FALSE)
         )
