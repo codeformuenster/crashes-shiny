@@ -122,13 +122,8 @@ server <- function(input, output, session) {
         setView(lat = 51.96, lng = 7.62, zoom = 12) %>%
         addProviderTiles(provider = "Esri.WorldImagery", group = "Terrain") %>%
         addProviderTiles(provider = "OpenStreetMap.BlackAndWhite", group = "OSM (B & W)") %>%
-        addCircles(lng = ~longitude,
+        addMarkers(lng = ~longitude,
                    lat = ~latitude,
-                   color = "black",
-                   opacity = 0.8,
-                   weight = 0.5,
-                   radius = 200,  #  Radius could be assigned to a another variable
-                   fillOpacity = 0.5,
                    popup = paste0(accidents_filtered()$tag,
                                  ",", accidents_filtered()$datum,
                                  ",", accidents_filtered()$uhrzeit,
