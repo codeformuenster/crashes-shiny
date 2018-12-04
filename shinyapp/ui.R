@@ -31,7 +31,29 @@ ui <- navbarPage("Münsteraner Verkehrsunfälle", id = "nav",
 														  'plugins' = list('remove_button')
 														  )
    				 		         )
-   				 		       )#,
+   				 		       ),
+   				 	  column(2,
+   				 	         selectizeInput(
+    									"years",
+                     	"Wähle Jahre:",
+                     	selected = 2010,
+                     	choices = list("2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014"), 
+    									multiple = TRUE, options = list(
+									    'plugins' = list('remove_button'))
+								  )
+   				 	  ),
+  					   column(2,
+   		 	         selectizeInput(
+  								"months",
+                 	"Wähle Monate:",
+  								# TODO use strings instead of numbers
+                 	selected = c(12),
+                 	choices = list(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12), 
+  								multiple = TRUE, options = list(
+  						    'plugins' = list('remove_button'))
+  					  )
+  					 )
+   				 	),
 #    				 		column(2,
 #    				 					 selectizeInput(
 # 											"hit_and_run",
@@ -42,7 +64,7 @@ ui <- navbarPage("Münsteraner Verkehrsunfälle", id = "nav",
 # 											  'plugins' = list('remove_button'))
 # 											)
 #    				 		)
-   				 	),
+#   				 	),
    				 	wellPanel(
    				 	  actionButton("QueryBtn", "Aktualisieren", icon = icon("refresh"))
    				 	)

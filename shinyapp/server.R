@@ -5,6 +5,7 @@ server <- function(input, output, session) {
 
   # open connection to database
   db_con <- dbConnect(dbDriver("PostgreSQL"), dbname = "ms_unfaelle",
+                    #host = "localhost", port = 5432,
                     host = "accidents-shiny-postgis", port = 5432,
                     user = "postgres", password = "ms_unfaelle")
 
@@ -69,12 +70,42 @@ server <- function(input, output, session) {
     #   filtered <- filtered %>%
     #     filter(flucht == FALSE)
     # }
-
+    
+    year_filter <- "("
+    for (yidx in 1:length(input$years)) {
+    			if (yidx != length(input$years)) {
+    				year_filter <- paste0(year_filter, "'" , input$years[yidx], "',")
+    			} else {
+    				# no comma after last date
+    				year_filter <- paste0(year_filter, "'" , input$years[yidx], "'")
+    			}
+    	}
+    year_filter <- paste0(year_filter, ")")
+    
+    month_filter <- "("
+    for (yidx in 1:length(input$months)) {
+    			if (yidx != length(input$months)) {
+    				month_filter <- paste0(month_filter, "'" , input$months[yidx], "',")
+    			} else {
+    				# no comma after last date
+    				month_filter <- paste0(month_filter, "'" , input$months[yidx], "'")
+    			}
+    	}
+    month_filter <- paste0(month_filter, ")")
+    
+    
     sql_string <- paste0("SELECT unfalldaten_raw.*,",
-                         " st_x(the_geom) as longitude, st_y(the_geom) as latitude",
+                         " st_x(the_geom) as longitude, st_y(the_geom) as latitude,",
+                         " parsed_timestamp, parsed_german_weekday",
                          " FROM unfalldaten_raw",
                          " JOIN unfalldaten_geometries on unfalldaten_raw.id = unfalldaten_geometries.unfall_id",
-                         " WHERE REGEXP_REPLACE(COALESCE(fg, '0'), '[^0-9]*' ,'0')::integer >= ", pedfilter,
+                         " JOIN unfalldaten_timestamps on unfalldaten_raw.id = unfalldaten_timestamps.id",
+                         " WHERE EXTRACT(year from parsed_timestamp) in ", year_filter,
+                         " AND EXTRACT(month from parsed_timestamp) in ", month_filter,
+                         #" WHERE EXTRACT(hours from parsed_timestamp) >= ", min_hour,
+                         #" WHERE EXTRACT(hours from parsed_timestamp) <= ", max_hour,
+                         #" WHERE EXTRACT(dow from parsed_timestamp) in ", weekday_filter,
+                         " AND REGEXP_REPLACE(COALESCE(fg, '0'), '[^0-9]*' ,'0')::integer >= ", pedfilter,
                          " AND REGEXP_REPLACE(COALESCE(rf, '0'), '[^0-9]*' ,'0')::integer >= ", bikefilter,
                          " AND REGEXP_REPLACE(COALESCE(pkw, '0'), '[^0-9]*' ,'0')::integer >= ", carfilter,
                          " AND REGEXP_REPLACE(COALESCE(lkw, '0'), '[^0-9]*' ,'0')::integer >= ", truckfilter,
@@ -85,7 +116,7 @@ server <- function(input, output, session) {
                          "   + (REGEXP_REPLACE(COALESCE(sonstige, '0'), '[^0-9]*' ,'0')::integer)) >= ", restfilter,
                          " AND REGEXP_REPLACE(COALESCE(lv, '0'), '[^0-9]*' ,'0')::integer >=", slightlyfilter,
                          " AND REGEXP_REPLACE(COALESCE(sv, '0'), '[^0-9]*' ,'0')::integer >=", seriouslyfilter,
-                         " AND REGEXP_REPLACE(COALESCE(t, '0'), '[^0-9]*' ,'0')::integer >=", deadfilter) # ,
+                         " AND REGEXP_REPLACE(COALESCE(t, '0'), '[^0-9]*' ,'0')::integer >=", deadfilter)
                         #" LIMIT 20000;")
 
     print(sql_string)
