@@ -5,7 +5,8 @@ server <- function(input, output, session) {
 
   # open connection to database
   db_con <- dbConnect(dbDriver("PostgreSQL"), dbname = "ms_unfaelle",
-                    #host = "localhost", port = 5432,
+                    # TODO
+                    # host = "localhost", port = 5432,
                     host = "accidents-shiny-postgis", port = 5432,
                     user = "postgres", password = "ms_unfaelle")
 
@@ -93,6 +94,17 @@ server <- function(input, output, session) {
     	}
     month_filter <- paste0(month_filter, ")")
     
+    weekdays_filter <- "("
+    for (yidx in 1:length(input$weekdays)) {
+    			if (yidx != length(input$weekdays)) {
+    				weekdays_filter <- paste0(weekdays_filter, "'" , input$weekdays[yidx], "',")
+    			} else {
+    				# no comma after last date
+    				weekdays_filter <- paste0(weekdays_filter, "'" , input$weekdays[yidx], "'")
+    			}
+    	}
+    weekdays_filter <- paste0(weekdays_filter, ")")
+    
     
     sql_string <- paste0("SELECT unfalldaten_raw.*,",
                          " st_x(the_geom) as longitude, st_y(the_geom) as latitude,",
@@ -102,9 +114,9 @@ server <- function(input, output, session) {
                          " JOIN unfalldaten_timestamps on unfalldaten_raw.id = unfalldaten_timestamps.id",
                          " WHERE EXTRACT(year from parsed_timestamp) in ", year_filter,
                          " AND EXTRACT(month from parsed_timestamp) in ", month_filter,
-                         #" WHERE EXTRACT(hours from parsed_timestamp) >= ", min_hour,
-                         #" WHERE EXTRACT(hours from parsed_timestamp) <= ", max_hour,
-                         #" WHERE EXTRACT(dow from parsed_timestamp) in ", weekday_filter,
+            #             " AND EXTRACT(hours from parsed_timestamp) >= ", min_hour_filter,
+             #            " AND EXTRACT(hours from parsed_timestamp) <= ", max_hour_filter,
+                         " AND EXTRACT(dow from parsed_timestamp) in ", weekdays_filter,
                          " AND REGEXP_REPLACE(COALESCE(fg, '0'), '[^0-9]*' ,'0')::integer >= ", pedfilter,
                          " AND REGEXP_REPLACE(COALESCE(rf, '0'), '[^0-9]*' ,'0')::integer >= ", bikefilter,
                          " AND REGEXP_REPLACE(COALESCE(pkw, '0'), '[^0-9]*' ,'0')::integer >= ", carfilter,
@@ -139,6 +151,7 @@ server <- function(input, output, session) {
         mutate(mofa = text_to_number(mofa)) %>%
         mutate(kkr = text_to_number(kkr)) %>%
         mutate(krad = text_to_number(krad)) %>%
+        mutate(kom = text_to_number(kom)) %>%
         mutate(sonstige = text_to_number(sonstige))
     }
 
@@ -190,6 +203,7 @@ server <- function(input, output, session) {
                                  ", sonstige Verkehrsmittel : ", accidents_filtered()$mofa +
                                    accidents_filtered()$kkr +
                                    accidents_filtered()$krad +
+                                   accidents_filtered()$kom +
                                    accidents_filtered()$sonstige),
                    group = "Markers") %>%
         addWebGLHeatmap(lng = ~longitude,

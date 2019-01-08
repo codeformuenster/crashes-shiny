@@ -13,7 +13,11 @@ ui <- navbarPage("Münsteraner Verkehrsunfälle", id = "nav",
 					   				 selectizeInput(
 														"vehicles",
 														"Unfallbeteiligte?",
-														choices = c("Fuß" = "ped", "Rad" = "bike", "PKW" = "car", "LKW" = "truck", "sonstiges" = "rest"),
+														choices = c("Fuß" = "ped", 
+														            "Rad" = "bike", 
+														            "PKW" = "car", 
+														            "LKW" = "truck", 
+														            "sonstiges" = "rest"),
 														selected = c("car"),
 														multiple = TRUE, 
 														options = list(
@@ -24,7 +28,9 @@ ui <- navbarPage("Münsteraner Verkehrsunfälle", id = "nav",
    				 		       selectizeInput(
    				 		         "injured",
    				 		         "Verletzte",
-   				 		         choices = c("Leichtverletzte" = "slightly", "Schwerverletzte" = "seriously", "Tote" = "dead"),
+   				 		         choices = c("Leichtverletzte" = "slightly", 
+   				 		                     "Schwerverletzte" = "seriously",
+   				 		                     "Tote" = "dead"),
    				 		         selected = c("seriously"),
    				 		         multiple = TRUE,
    				 		         options = list(
@@ -37,23 +43,57 @@ ui <- navbarPage("Münsteraner Verkehrsunfälle", id = "nav",
     									"years",
                      	"Wähle Jahre:",
                      	selected = 2010,
-                     	choices = list("2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014"), 
+                     	choices = list("2007", 
+                     	               "2008",
+                     	               "2009",
+                     	               "2010",
+                     	               "2011",
+                     	               "2012",
+                     	               "2013",
+                     	               "2014"), 
     									multiple = TRUE, options = list(
 									    'plugins' = list('remove_button'))
 								  )
    				 	  ),
-  					   column(2,
-   		 	         selectizeInput(
-  								"months",
-                 	"Wähle Monate:",
-  								# TODO use strings instead of numbers
-                 	selected = c(12),
-                 	choices = list(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12), 
-  								multiple = TRUE, options = list(
-  						    'plugins' = list('remove_button'))
-  					  )
-  					 )
-   				 	),
+							column(2,
+							       selectizeInput(
+							         "months",
+							         "Wähle Monate:",
+                       	selected = c(1, 10),
+                       	choices = list("Januar" = 1, 
+                       	               "Februar" = 2, 
+                       	               "März" = 3, 
+                       	               "April" = 4, 
+                       	               "Mai" = 5,
+                       	               "Juni" = 6,
+                       	               "Juli" = 7,
+                       	               "August" = 8,
+                       	               "September" = 9,
+                       	               "Oktober" = 10, 
+                       	               "November" = 11,
+                       	               "Dezember" = 12), 
+        								multiple = TRUE, options = list(
+  						          'plugins' = list('remove_button'))
+  					          )
+  					        ),
+   				 	  #),
+							column(2,
+							       selectizeInput(
+							         "weekdays",
+							         "Wähle Wochentage:",
+                       	selected = c(1, 5),
+                       	choices = list("Montag" = 1,
+                       	               "Dienstag" = 2,
+                       	               "Mittwoch" = 3,
+                       	               "Donnerstag" = 4,
+                       	               "Freitag" = 5,
+                       	               "Samstag" = 6,
+                       	               "Sonntag" = 0), 
+        								multiple = TRUE, options = list(
+  						          'plugins' = list('remove_button'))
+  					          )
+  					        )
+   				 	  ),
 #    				 		column(2,
 #    				 					 selectizeInput(
 # 											"hit_and_run",
