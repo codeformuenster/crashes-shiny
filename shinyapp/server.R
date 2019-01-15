@@ -99,7 +99,7 @@ server <- function(input, output, session) {
                               "'7',", "'8',", "'9',", "'10',", "'11',", "'12'", ")")
     }
     
-    if(length(input$weekdays) > 0) {
+    if (length(input$weekdays) > 0) {
       weekdays_filter <- "("
       for (widx in 1:length(input$weekdays)) {
         print(widx)
@@ -120,25 +120,26 @@ server <- function(input, output, session) {
                          " st_x(the_geom) as longitude, st_y(the_geom) as latitude,",
                          " parsed_timestamp, parsed_german_weekday",
                          " FROM unfalldaten_raw",
-                         " JOIN unfalldaten_geometries on unfalldaten_raw.id = unfalldaten_geometries.unfall_id",
-                         " JOIN unfalldaten_timestamps on unfalldaten_raw.id = unfalldaten_timestamps.id",
+                         " LEFT JOIN unfalldaten_geometries on unfalldaten_raw.id = unfalldaten_geometries.unfall_id",
+                         " JOIN unfalldaten_timestamps on unfalldaten_raw.id = unfalldaten_timestamps.unfall_id",
                          " WHERE EXTRACT(year from parsed_timestamp) in ", year_filter,
                          " AND EXTRACT(month from parsed_timestamp) in ", month_filter,
                          " AND EXTRACT(hours from parsed_timestamp) >= ", input$hour_filter[1],
                          " AND EXTRACT(hours from parsed_timestamp) < ", input$hour_filter[2],
                          " AND EXTRACT(dow from parsed_timestamp) in ", weekdays_filter,
-                         " AND REGEXP_REPLACE(COALESCE(fg, '0'), '[^0-9]*' ,'0')::integer >= ", pedfilter,
-                         " AND REGEXP_REPLACE(COALESCE(rf, '0'), '[^0-9]*' ,'0')::integer >= ", bikefilter,
-                         " AND REGEXP_REPLACE(COALESCE(pkw, '0'), '[^0-9]*' ,'0')::integer >= ", carfilter,
-                         " AND REGEXP_REPLACE(COALESCE(lkw, '0'), '[^0-9]*' ,'0')::integer >= ", truckfilter,
-                         " AND ((REGEXP_REPLACE(COALESCE(mofa, '0'), '[^0-9]*' ,'0')::integer) ",
+                         " AND (REGEXP_REPLACE(COALESCE(fg, '0'), '[^0-9]*' ,'0')::integer >= ", pedfilter,
+                         " OR REGEXP_REPLACE(COALESCE(rf, '0'), '[^0-9]*' ,'0')::integer >= ", bikefilter,
+                         " OR REGEXP_REPLACE(COALESCE(pkw, '0'), '[^0-9]*' ,'0')::integer >= ", carfilter,
+                         " OR REGEXP_REPLACE(COALESCE(lkw, '0'), '[^0-9]*' ,'0')::integer >= ", truckfilter,
+                         " OR ((REGEXP_REPLACE(COALESCE(mofa, '0'), '[^0-9]*' ,'0')::integer) ",
                          "   + (REGEXP_REPLACE(COALESCE(kkr, '0'), '[^0-9]*' ,'0')::integer) ",
                          "   + (REGEXP_REPLACE(COALESCE(krad, '0'), '[^0-9]*' ,'0')::integer) ",
                          "   + (REGEXP_REPLACE(COALESCE(kom, '0'), '[^0-9]*' ,'0')::integer) ",
                          "   + (REGEXP_REPLACE(COALESCE(sonstige, '0'), '[^0-9]*' ,'0')::integer)) >= ", restfilter,
-                         " AND REGEXP_REPLACE(COALESCE(lv, '0'), '[^0-9]*' ,'0')::integer >= ", slightlyfilter,
-                         " AND REGEXP_REPLACE(COALESCE(sv, '0'), '[^0-9]*' ,'0')::integer >= ", seriouslyfilter,
-                         " AND REGEXP_REPLACE(COALESCE(t, '0'), '[^0-9]*' ,'0')::integer >= ", deadfilter)
+                         ") AND (REGEXP_REPLACE(COALESCE(lv, '0'), '[^0-9]*' ,'0')::integer >= ", slightlyfilter,
+                         " OR REGEXP_REPLACE(COALESCE(sv, '0'), '[^0-9]*' ,'0')::integer >= ", seriouslyfilter,
+                         " OR REGEXP_REPLACE(COALESCE(t, '0'), '[^0-9]*' ,'0')::integer >= ", deadfilter,
+                         ")")
                         #" LIMIT 20000;")
 
     print(sql_string)
@@ -184,7 +185,9 @@ server <- function(input, output, session) {
 
     accidents_to_plot <- accidents_filtered()
     visualization_options <- c("Heatmap")
-
+    
+    print(nrow(accidents_to_plot))
+    
     if (nrow(accidents_to_plot) < 2000) {
       visualization_options <- c(visualization_options, "Markers")
     }
