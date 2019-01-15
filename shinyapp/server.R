@@ -83,28 +83,38 @@ server <- function(input, output, session) {
     	}
     year_filter <- paste0(year_filter, ")")
     
-    month_filter <- "("
-    for (yidx in 1:length(input$months)) {
-    			if (yidx != length(input$months)) {
-    				month_filter <- paste0(month_filter, "'" , input$months[yidx], "',")
-    			} else {
-    				# no comma after last date
-    				month_filter <- paste0(month_filter, "'" , input$months[yidx], "'")
-    			}
-    	}
-    month_filter <- paste0(month_filter, ")")
+    if (length(input$months) > 0) {
+      month_filter <- "("
+      for (midx in 1:length(input$months)) {
+      			if (midx != length(input$months)) {
+      				month_filter <- paste0(month_filter, "'" , input$months[midx], "',")
+      			} else {
+      				# no comma after last date
+      				month_filter <- paste0(month_filter, "'" , input$months[midx], "'")
+      			}
+      	}
+      month_filter <- paste0(month_filter, ")")
+    } else {
+      month_filter <- paste0("(", "'1',", "'2',", "'3',", "'4',", "'5',", "'6',", 
+                              "'7',", "'8',", "'9',", "'10',", "'11',", "'12'", ")")
+    }
     
-    weekdays_filter <- "("
-    for (yidx in 1:length(input$weekdays)) {
-    			if (yidx != length(input$weekdays)) {
-    				weekdays_filter <- paste0(weekdays_filter, "'" , input$weekdays[yidx], "',")
-    			} else {
-    				# no comma after last date
-    				weekdays_filter <- paste0(weekdays_filter, "'" , input$weekdays[yidx], "'")
-    			}
-    	}
-    weekdays_filter <- paste0(weekdays_filter, ")")
-    
+    if(length(input$weekdays) > 0) {
+      weekdays_filter <- "("
+      for (widx in 1:length(input$weekdays)) {
+        print(widx)
+      			if (widx != length(input$weekdays)) {
+      				weekdays_filter <- paste0(weekdays_filter, "'" , input$weekdays[widx], "',")
+      			} else {
+      				# no comma after last date
+      				weekdays_filter <- paste0(weekdays_filter, "'" , input$weekdays[widx], "'")
+      			}
+      	}
+      weekdays_filter <- paste0(weekdays_filter, ")")
+    } else {
+      weekdays_filter <- paste0("(", "'0',", "'1',", "'2',", "'3',", "'4',", "'5',", "'6'", ")")
+    }
+                           
     
     sql_string <- paste0("SELECT unfalldaten_raw.*,",
                          " st_x(the_geom) as longitude, st_y(the_geom) as latitude,",
@@ -114,8 +124,8 @@ server <- function(input, output, session) {
                          " JOIN unfalldaten_timestamps on unfalldaten_raw.id = unfalldaten_timestamps.id",
                          " WHERE EXTRACT(year from parsed_timestamp) in ", year_filter,
                          " AND EXTRACT(month from parsed_timestamp) in ", month_filter,
-            #             " AND EXTRACT(hours from parsed_timestamp) >= ", min_hour_filter,
-             #            " AND EXTRACT(hours from parsed_timestamp) <= ", max_hour_filter,
+                         " AND EXTRACT(hours from parsed_timestamp) >= ", input$hour_filter[1],
+                         " AND EXTRACT(hours from parsed_timestamp) < ", input$hour_filter[2],
                          " AND EXTRACT(dow from parsed_timestamp) in ", weekdays_filter,
                          " AND REGEXP_REPLACE(COALESCE(fg, '0'), '[^0-9]*' ,'0')::integer >= ", pedfilter,
                          " AND REGEXP_REPLACE(COALESCE(rf, '0'), '[^0-9]*' ,'0')::integer >= ", bikefilter,
@@ -126,9 +136,9 @@ server <- function(input, output, session) {
                          "   + (REGEXP_REPLACE(COALESCE(krad, '0'), '[^0-9]*' ,'0')::integer) ",
                          "   + (REGEXP_REPLACE(COALESCE(kom, '0'), '[^0-9]*' ,'0')::integer) ",
                          "   + (REGEXP_REPLACE(COALESCE(sonstige, '0'), '[^0-9]*' ,'0')::integer)) >= ", restfilter,
-                         " AND REGEXP_REPLACE(COALESCE(lv, '0'), '[^0-9]*' ,'0')::integer >=", slightlyfilter,
-                         " AND REGEXP_REPLACE(COALESCE(sv, '0'), '[^0-9]*' ,'0')::integer >=", seriouslyfilter,
-                         " AND REGEXP_REPLACE(COALESCE(t, '0'), '[^0-9]*' ,'0')::integer >=", deadfilter)
+                         " AND REGEXP_REPLACE(COALESCE(lv, '0'), '[^0-9]*' ,'0')::integer >= ", slightlyfilter,
+                         " AND REGEXP_REPLACE(COALESCE(sv, '0'), '[^0-9]*' ,'0')::integer >= ", seriouslyfilter,
+                         " AND REGEXP_REPLACE(COALESCE(t, '0'), '[^0-9]*' ,'0')::integer >= ", deadfilter)
                         #" LIMIT 20000;")
 
     print(sql_string)

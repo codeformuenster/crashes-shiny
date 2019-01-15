@@ -50,7 +50,9 @@ ui <- navbarPage("Münsteraner Verkehrsunfälle", id = "nav",
                      	               "2011",
                      	               "2012",
                      	               "2013",
-                     	               "2014"), 
+                     	               "2014",
+                     	               "2015",
+                     	               "2016"), 
     									multiple = TRUE, options = list(
 									    'plugins' = list('remove_button'))
 								  )
@@ -76,7 +78,6 @@ ui <- navbarPage("Münsteraner Verkehrsunfälle", id = "nav",
   						          'plugins' = list('remove_button'))
   					          )
   					        ),
-   				 	  #),
 							column(2,
 							       selectizeInput(
 							         "weekdays",
@@ -92,7 +93,16 @@ ui <- navbarPage("Münsteraner Verkehrsunfälle", id = "nav",
         								multiple = TRUE, options = list(
   						          'plugins' = list('remove_button'))
   					          )
-  					        )
+  					        ),
+							column(2,
+								sliderInput(
+      								"hour_filter",
+      								"Wähle Uhrzeit:",
+      								min = 0,
+      								max = 24,
+      								value = c(0, 24)
+							  )
+							)
    				 	  ),
 #    				 		column(2,
 #    				 					 selectizeInput(
