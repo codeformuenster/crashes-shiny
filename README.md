@@ -1,11 +1,11 @@
-# accidents
+# crashes-shiny
 Visualisierung Münsteraner Verkehrsunfälle
 
 # start docker image
 ```
-sudo docker build -t accidents-local .
+sudo docker build -t crashes-local .
 mkdir logs
-sudo docker run --rm -p 3838:3838 --privileged -v $PWD/logs/:/var/log/shiny-server/ accidents-local
+sudo docker run --rm -p 3838:3838 --privileged -v $PWD/logs/:/var/log/shiny-server/ crashes-local
 ```
 open browser and point it to `localhost:3838`, see `logs` directory for app logs
 

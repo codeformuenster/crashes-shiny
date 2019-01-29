@@ -6,8 +6,8 @@ server <- function(input, output, session) {
   # open connection to database
   db_con <- dbConnect(dbDriver("PostgreSQL"), dbname = "ms_unfaelle",
                     # TODO
-                    # host = "localhost", port = 5432,
-                    host = "accidents-shiny-postgis", port = 5432,
+                     host = "localhost", port = 5432,
+                    #host = "accidents-shiny-postgis", port = 5432,
                     user = "postgres", password = "ms_unfaelle")
 
   # close connection to database once shiny session ended
@@ -22,7 +22,7 @@ server <- function(input, output, session) {
     return(ifelse(is.na(as.numeric(text)), 0, as.numeric(text)))
   }
 
-  accidents_filtered <- eventReactive(input$QueryBtn, ignoreNULL = FALSE, {
+  crashes_filtered <- eventReactive(input$QueryBtn, ignoreNULL = FALSE, {
     # filter involved vehicles
     
     ped_filter <- FALSE
@@ -169,8 +169,8 @@ server <- function(input, output, session) {
     return(filtered)
   })
 
-  output$number_of_accidents <- renderText({
-    paste0("Anzahl Unfälle: ", nrow(accidents_filtered()))
+  output$number_of_crashes <- renderText({
+    paste0("Anzahl Unfälle: ", nrow(crashes_filtered()))
   })
 
   # LEAFLET -----------------------------------------------------------------
@@ -178,49 +178,49 @@ server <- function(input, output, session) {
   
   output$karte <- renderLeaflet({
     # pal11 <- colorNumeric(palette = "PuRd",
-                          # accidents_filtered()$anzahl_beteiligte)
+                          # crashes_filtered()$anzahl_beteiligte)
     # pal12 <- colorNumeric(palette = "PuBuGn",
                           # ks4_sp_ll()@data$pears)
     # pal13 <- colorNumeric(palette = "YlOrRd",
     #                       ks4_sp_ll()@data$total_area)
 
-    accidents_to_plot <- accidents_filtered()
+    crashes_to_plot <- crashes_filtered()
     visualization_options <- c("Heatmap")
     
-    print(nrow(accidents_to_plot))
+    print(nrow(crashes_to_plot))
     
-    print(nrow(accidents_filtered()))
+    print(nrow(crashes_filtered()))
     
-    if (nrow(accidents_to_plot) < 2000) {
+    if (nrow(crashes_to_plot) < 2000) {
       visualization_options <- c(visualization_options, "Markers")
     }
 
-    if (nrow(accidents_to_plot > 0)) {
+    if (nrow(crashes_to_plot > 0)) {
 
-      map <- leaflet(data = accidents_to_plot) %>%
+      map <- leaflet(data = crashes_to_plot) %>%
         setView(lat = 51.96, lng = 7.62, zoom = 12) %>%
         addProviderTiles(provider = "Esri.WorldImagery", group = "Terrain") %>%
         addProviderTiles(provider = "CartoDB.Positron", group = "schematisch") %>%
         addMarkers(lng = ~longitude,
                    lat = ~latitude,
-                   popup = paste0(accidents_filtered()$tag,
-                                 ", ", accidents_filtered()$datum,
-                                 ", ", accidents_filtered()$uhrzeit,
-                                 ", id: ",  accidents_filtered()$id,
-                                 ", ", accidents_filtered()$vu_ort,
-                                 " ", accidents_filtered()$vu_hoehe,
-                                 ",<br>Tote: ",  accidents_filtered()$t,
-                                 ", Schwerverletzte: ",  accidents_filtered()$sv,
-                                 ", Leichtverletzte: ",  accidents_filtered()$lv,
-                                 ",<br>PKW: ", accidents_filtered()$pkw,
-                                 ", LKW: ", accidents_filtered()$lkw,
-                                 ", Fußgänger: ", accidents_filtered()$fg,
-                                 ", Fahrräder: ", accidents_filtered()$rf,
-                                 ", sonstige Verkehrsmittel : ", accidents_filtered()$mofa +
-                                   accidents_filtered()$kkr +
-                                   accidents_filtered()$krad +
-                                   accidents_filtered()$kom +
-                                   accidents_filtered()$sonstige),
+                   popup = paste0(crashes_filtered()$tag,
+                                 ", ", crashes_filtered()$datum,
+                                 ", ", crashes_filtered()$uhrzeit,
+                                 ", id: ", crashes_filtered()$id,
+                                 ", ", crashes_filtered()$vu_ort,
+                                 " ", crashes_filtered()$vu_hoehe,
+                                 ",<br>Tote: ", crashes_filtered()$t,
+                                 ", Schwerverletzte: ", crashes_filtered()$sv,
+                                 ", Leichtverletzte: ", crashes_filtered()$lv,
+                                 ",<br>PKW: ", crashes_filtered()$pkw,
+                                 ", LKW: ", crashes_filtered()$lkw,
+                                 ", Fußgänger: ", crashes_filtered()$fg,
+                                 ", Fahrräder: ", crashes_filtered()$rf,
+                                 ", sonstige Verkehrsmittel : ", crashes_filtered()$mofa +
+                                   crashes_filtered()$kkr +
+                                   crashes_filtered()$krad +
+                                   crashes_filtered()$kom +
+                                   crashes_filtered()$sonstige),
                    group = "Markers") %>%
         addWebGLHeatmap(lng = ~longitude,
                         lat = ~latitude,
@@ -257,10 +257,10 @@ server <- function(input, output, session) {
     map
   })
 
-   output$accidents_table <- DT::renderDataTable({
-    all_accidents <- dbGetQuery(db_con, "SELECT * FROM unfalldaten_raw")
+   output$crashes_table <- DT::renderDataTable({
+    all_crashes <- dbGetQuery(db_con, "SELECT * FROM unfalldaten_raw")
 
-    DT::datatable(all_accidents, options = list(orderClasses = TRUE))
+    DT::datatable(all_crashes, options = list(orderClasses = TRUE))
   })
 }
 

@@ -11,7 +11,7 @@ ui <- navbarPage("Münsteraner Verkehrsunfälle", id = "nav",
    tabPanel("Interaktive Karte",
             div(h5("Beta-Version, Feedback willkommen!")),
             withSpinner(leafletOutput("karte")),
-            textOutput("number_of_accidents"),
+            textOutput("number_of_crashes"),
    				 	wellPanel(
    				 	  column(2,
 					   				 selectizeInput(
@@ -124,7 +124,7 @@ ui <- navbarPage("Münsteraner Verkehrsunfälle", id = "nav",
            
 	tabPanel("Rohdaten",
 	         div(h5("Beta-Version, Feedback willkommen!")),
-	         DT::dataTableOutput("accidents_table")
+	         DT::dataTableOutput("crashes_table")
 	         ),
 	
 	tabPanel("Über diese Seite",
@@ -138,7 +138,7 @@ ui <- navbarPage("Münsteraner Verkehrsunfälle", id = "nav",
 	         p("Ein Projekt von ",
 	         	a(href = "https://codeformuenster.org", target = "_blank", "Code for Münster")),
 	         p("Lizenziert unter der ",
-	         	a(href = "https://github.com/codeformuenster/accidents#rechtliches", target = "_blank", "GPLv3 (mehr Infos zur Lizenz hier).")),
+	         	a(href = "https://github.com/codeformuenster/crashes-shiny#rechtliches", target = "_blank", "GPLv3 (mehr Infos zur Lizenz hier).")),
 	         p("Ideen und Feedback willkommen!")
 	)
 )
