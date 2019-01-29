@@ -1,24 +1,28 @@
 library(shiny)
 library(leaflet)
 library(leaflet.extras)
+library(shinycssloaders)
+
+# define type of loading animation
+options("spinner.type" = 4)
 
 ui <- navbarPage("Münsteraner Verkehrsunfälle", id = "nav",
                  
    tabPanel("Interaktive Karte",
             div(h5("Beta-Version, Feedback willkommen!")),
-            leafletOutput("karte"),
+            withSpinner(leafletOutput("karte")),
             textOutput("number_of_accidents"),
    				 	wellPanel(
    				 	  column(2,
 					   				 selectizeInput(
 														"vehicles",
-														"Unfallbeteiligte?",
+														"Unfallbeteiligte",
 														choices = c("Fuß" = "ped", 
 														            "Rad" = "bike", 
 														            "PKW" = "car", 
 														            "LKW" = "truck", 
 														            "sonstiges" = "rest"),
-														selected = c("ped", "bike", "car", "truck", "rest"),
+														selected = c("bike", "car"),
 														multiple = TRUE, 
 														options = list(
 														  'plugins' = list('remove_button'))
@@ -31,7 +35,7 @@ ui <- navbarPage("Münsteraner Verkehrsunfälle", id = "nav",
    				 		         choices = c("Leichtverletzte" = "slightly", 
    				 		                     "Schwerverletzte" = "seriously",
    				 		                     "Tote" = "dead"),
-   				 		         selected = c("slightly", "seriously", "dead"),
+   				 		         selected = c("slightly"),
    				 		         multiple = TRUE,
    				 		         options = list(
 														  'plugins' = list('remove_button')
@@ -42,7 +46,7 @@ ui <- navbarPage("Münsteraner Verkehrsunfälle", id = "nav",
    				 	         selectizeInput(
     									"years",
                      	"Wähle Jahre:",
-                     	selected = c(2012),
+                     	selected = c(2013, 2014),
                      	choices = list("2007", 
                      	               "2008",
                      	               "2009",
@@ -50,9 +54,7 @@ ui <- navbarPage("Münsteraner Verkehrsunfälle", id = "nav",
                      	               "2011",
                      	               "2012",
                      	               "2013",
-                     	               "2014",
-                     	               "2015",
-                     	               "2016"), 
+                     	               "2014"), 
     									multiple = TRUE, options = list(
 									    'plugins' = list('remove_button'))
 								  )

@@ -25,42 +25,42 @@ server <- function(input, output, session) {
   accidents_filtered <- eventReactive(input$QueryBtn, ignoreNULL = FALSE, {
     # filter involved vehicles
     
-    pedfilter <- 0
-    bikefilter <- 0
-    carfilter <- 0
-    truckfilter <- 0
-    restfilter <- 0
+    ped_filter <- FALSE
+    bike_filter <- FALSE
+    car_filter <- FALSE
+    truck_filter <- FALSE
+    rest_filter <- FALSE
 
     if ("ped" %in% input$vehicles) {
-      pedfilter <- 1
+      ped_filter <- TRUE
     }
     if ("bike" %in% input$vehicles) {
-      bikefilter <- 1
+      bike_filter <- TRUE
     }
     if ("car" %in% input$vehicles) {
-      carfilter <- 1
+      car_filter <- TRUE
     }
     if ("truck" %in% input$vehicles) {
-      truckfilter <- 1
+      truck_filter <- TRUE
     }
     if ("rest" %in% input$vehicles) {
-      restfilter <- 1
+      rest_filter <- TRUE
     }
     
     # filter injuries
     
-    slightlyfilter <- 0
-    seriouslyfilter <- 0
-    deadfilter <- 0
+    slightly_filter <- FALSE
+    seriously_filter <- FALSE
+    dead_filter <- FALSE
     
     if ("slightly" %in% input$injured) {
-      slightlyfilter <- 1
+      slightly_filter <- TRUE
     }
     if ("seriously" %in% input$injured) {
-      seriouslyfilter <- 1
+      seriously_filter <- TRUE
     }
     if ("dead" %in% input$injured) {
-      deadfilter <- 1
+      dead_filter <- TRUE
     }
 
     # TODO hit and run?
@@ -114,32 +114,32 @@ server <- function(input, output, session) {
     } else {
       weekdays_filter <- paste0("(", "'0',", "'1',", "'2',", "'3',", "'4',", "'5',", "'6'", ")")
     }
-                           
     
     sql_string <- paste0("SELECT unfalldaten_raw.*,",
                          " st_x(the_geom) as longitude, st_y(the_geom) as latitude,",
                          " parsed_timestamp, parsed_german_weekday",
                          " FROM unfalldaten_raw",
-                         " LEFT JOIN unfalldaten_geometries on unfalldaten_raw.id = unfalldaten_geometries.unfall_id",
+                         " JOIN unfalldaten_geometries on unfalldaten_raw.id = unfalldaten_geometries.unfall_id",
                          " JOIN unfalldaten_timestamps on unfalldaten_raw.id = unfalldaten_timestamps.unfall_id",
                          " WHERE EXTRACT(year from parsed_timestamp) in ", year_filter,
                          " AND EXTRACT(month from parsed_timestamp) in ", month_filter,
                          " AND EXTRACT(hours from parsed_timestamp) >= ", input$hour_filter[1],
                          " AND EXTRACT(hours from parsed_timestamp) < ", input$hour_filter[2],
                          " AND EXTRACT(dow from parsed_timestamp) in ", weekdays_filter,
-                         " AND (REGEXP_REPLACE(COALESCE(fg, '0'), '[^0-9]*' ,'0')::integer >= ", pedfilter,
-                         " OR REGEXP_REPLACE(COALESCE(rf, '0'), '[^0-9]*' ,'0')::integer >= ", bikefilter,
-                         " OR REGEXP_REPLACE(COALESCE(pkw, '0'), '[^0-9]*' ,'0')::integer >= ", carfilter,
-                         " OR REGEXP_REPLACE(COALESCE(lkw, '0'), '[^0-9]*' ,'0')::integer >= ", truckfilter,
-                         " OR ((REGEXP_REPLACE(COALESCE(mofa, '0'), '[^0-9]*' ,'0')::integer) ",
-                         "   + (REGEXP_REPLACE(COALESCE(kkr, '0'), '[^0-9]*' ,'0')::integer) ",
-                         "   + (REGEXP_REPLACE(COALESCE(krad, '0'), '[^0-9]*' ,'0')::integer) ",
-                         "   + (REGEXP_REPLACE(COALESCE(kom, '0'), '[^0-9]*' ,'0')::integer) ",
-                         "   + (REGEXP_REPLACE(COALESCE(sonstige, '0'), '[^0-9]*' ,'0')::integer)) >= ", restfilter,
-                         ") AND (REGEXP_REPLACE(COALESCE(lv, '0'), '[^0-9]*' ,'0')::integer >= ", slightlyfilter,
-                         " OR REGEXP_REPLACE(COALESCE(sv, '0'), '[^0-9]*' ,'0')::integer >= ", seriouslyfilter,
-                         " OR REGEXP_REPLACE(COALESCE(t, '0'), '[^0-9]*' ,'0')::integer >= ", deadfilter,
-                         ")")
+                         # if_else(vehicle_filter, " AND (", ""),
+                         if_else(ped_filter, " AND REGEXP_REPLACE(COALESCE(fg, '0'), '[^0-9]*' ,'0')::integer > 0", ""),
+                         if_else(bike_filter, " AND REGEXP_REPLACE(COALESCE(rf, '0'), '[^0-9]*' ,'0')::integer > 0", ""),
+                         if_else(car_filter, " AND REGEXP_REPLACE(COALESCE(pkw, '0'), '[^0-9]*' ,'0')::integer > 0", ""),
+                         if_else(truck_filter, " AND REGEXP_REPLACE(COALESCE(lkw, '0'), '[^0-9]*' ,'0')::integer > 0", ""),
+                         if_else(rest_filter, paste0(" AND (REGEXP_REPLACE(COALESCE(mofa, '0'), '[^0-9]*' ,'0')::integer ",
+                         "   + REGEXP_REPLACE(COALESCE(kkr, '0'), '[^0-9]*' ,'0')::integer ",
+                         "   + REGEXP_REPLACE(COALESCE(krad, '0'), '[^0-9]*' ,'0')::integer ",
+                         "   + REGEXP_REPLACE(COALESCE(kom, '0'), '[^0-9]*' ,'0')::integer ",
+                         "   + REGEXP_REPLACE(COALESCE(sonstige, '0'), '[^0-9]*' ,'0')::integer) > 0"), ""),
+                         if_else(slightly_filter, " AND REGEXP_REPLACE(COALESCE(lv, '0'), '[^0-9]*' ,'0')::integer > 0", ""),
+                         if_else(seriously_filter," AND REGEXP_REPLACE(COALESCE(sv, '0'), '[^0-9]*' ,'0')::integer > 0", ""),
+                         if_else(dead_filter," AND REGEXP_REPLACE(COALESCE(t, '0'), '[^0-9]*' ,'0')::integer > 0", "")
+                        )
                         #" LIMIT 20000;")
 
     print(sql_string)
@@ -169,12 +169,13 @@ server <- function(input, output, session) {
     return(filtered)
   })
 
-  # LEAFLET -----------------------------------------------------------------
-
   output$number_of_accidents <- renderText({
     paste0("Anzahl Unfälle: ", nrow(accidents_filtered()))
   })
 
+  # LEAFLET -----------------------------------------------------------------
+
+  
   output$karte <- renderLeaflet({
     # pal11 <- colorNumeric(palette = "PuRd",
                           # accidents_filtered()$anzahl_beteiligte)
@@ -187,6 +188,8 @@ server <- function(input, output, session) {
     visualization_options <- c("Heatmap")
     
     print(nrow(accidents_to_plot))
+    
+    print(nrow(accidents_filtered()))
     
     if (nrow(accidents_to_plot) < 2000) {
       visualization_options <- c(visualization_options, "Markers")
@@ -206,10 +209,10 @@ server <- function(input, output, session) {
                                  ", id: ",  accidents_filtered()$id,
                                  ", ", accidents_filtered()$vu_ort,
                                  " ", accidents_filtered()$vu_hoehe,
-                                 ",\nTote: ",  accidents_filtered()$t,
+                                 ",<br>Tote: ",  accidents_filtered()$t,
                                  ", Schwerverletzte: ",  accidents_filtered()$sv,
                                  ", Leichtverletzte: ",  accidents_filtered()$lv,
-                                 ",\nPKW: ", accidents_filtered()$pkw,
+                                 ",<br>PKW: ", accidents_filtered()$pkw,
                                  ", LKW: ", accidents_filtered()$lkw,
                                  ", Fußgänger: ", accidents_filtered()$fg,
                                  ", Fahrräder: ", accidents_filtered()$rf,
