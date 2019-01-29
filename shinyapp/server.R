@@ -224,10 +224,11 @@ server <- function(input, output, session) {
                    group = "Markers") %>%
         addWebGLHeatmap(lng = ~longitude,
                         lat = ~latitude,
+                        # intensity = 0.5, TODO use interactively with slider
                         size = 500, units = "m",
                         group = "Heatmap") %>%
         ### Groups
-        hideGroup("Markers") %>%
+        hideGroup("Markers") %>% 
         hideGroup("Terrain") %>%
         showGroup("schematisch)") %>%
         # Layers control
@@ -237,6 +238,7 @@ server <- function(input, output, session) {
           overlayGroups = visualization_options,
           options = layersControlOptions(collapsed = FALSE)
         )
+
     } else {
       map <- leaflet() %>%
         setView(lat = 51.96, lng = 7.62, zoom = 12) %>%
