@@ -7,7 +7,7 @@ server <- function(input, output, session) {
   db_con <- dbConnect(dbDriver("PostgreSQL"), dbname = "ms_unfaelle",
                     # TODO
                     # host = "localhost", port = 5432,
-                    host = "accidents-shiny-postgis", port = 5432,
+                    host = Sys.getenv("POSTGRES_HOST"), port = 5432,
                     user = "postgres", password = "ms_unfaelle")
 
   # close connection to database once shiny session ended
