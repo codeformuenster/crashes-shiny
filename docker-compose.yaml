@@ -4,6 +4,8 @@ services:
     build: .
     ports: 
       - "3838:3838"
+    volumes:
+      - ./logs:/var/log/shiny-server
 
   postgis:
     image: quay.io/codeformuenster/verkehrsunfall-postgis:master
