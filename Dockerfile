@@ -1,17 +1,12 @@
-FROM rocker/rstudio:3.5.0
+FROM rocker/rstudio:3.5.2
 
-# load shiny into rstudio image (see https://github.com/rocker-org/shiny/pull/31/)
-EXPOSE 3838
+RUN apt-get update && apt-get install -y --no-install-recommends libpng-dev libpq-dev \
+  && install2.r --error leaflet leaflet.extras dplyr shinycssloaders DT RPostgreSQL \
+  && ADD="shiny" bash /etc/cont-init.d/add \
+  && chown shiny:shiny /var/lib/shiny-server
 
-RUN export ADD="shiny" && \
-    bash /etc/cont-init.d/add
-
+USER shiny
 COPY ./shinyapp /srv/shiny-server/
 
-# install system package needed for some R packages
-RUN apt-get update && apt-get install -y --no-install-recommends libpng-dev libpq-dev
-
-# install R packages so that they are cached (in opposite to installing them via R)
-RUN install2.r --error leaflet leaflet.extras dplyr shinycssloaders DT RPostgreSQL
-
+EXPOSE 3838
 CMD ["/usr/bin/shiny-server"]
