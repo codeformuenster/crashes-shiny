@@ -2,7 +2,7 @@ FROM rocker/rstudio:3.5.2
 
 RUN apt-get update && apt-get install -y --no-install-recommends libpng-dev libpq-dev \
   && install2.r --error leaflet leaflet.extras dplyr shinycssloaders DT RPostgreSQL \
-  && RUN ADD="shiny" bash /etc/cont-init.d/add \
+  && ADD="shiny" bash /etc/cont-init.d/add \
   && chown shiny:shiny /var/lib/shiny-server
 
 USER shiny
