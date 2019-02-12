@@ -5,8 +5,6 @@ server <- function(input, output, session) {
 
   # open connection to database
   db_con <- dbConnect(dbDriver("PostgreSQL"), dbname = "ms_unfaelle",
-                    # TODO
-                    # host = "localhost", port = 5432,
                     host = Sys.getenv("POSTGRES_HOST"), port = 5432,
                     user = "postgres", password = "ms_unfaelle")
 
@@ -62,15 +60,6 @@ server <- function(input, output, session) {
     if ("dead" %in% input$injured) {
       dead_filter <- TRUE
     }
-
-    # TODO hit and run?
-    # if (input$hit_and_run == "yes") {
-    #   filtered <- filtered %>%
-    #     filter(flucht == TRUE)
-    # } else if (input$hit_and_run == "no") {
-    #   filtered <- filtered %>%
-    #     filter(flucht == FALSE)
-    # }
     
     year_filter <- "("
     for (yidx in 1:length(input$years)) {
@@ -177,87 +166,78 @@ server <- function(input, output, session) {
 
   
   output$karte <- renderLeaflet({
-    # pal11 <- colorNumeric(palette = "PuRd",
-                          # crashes_filtered()$anzahl_beteiligte)
-    # pal12 <- colorNumeric(palette = "PuBuGn",
-                          # ks4_sp_ll()@data$pears)
-    # pal13 <- colorNumeric(palette = "YlOrRd",
-    #                       ks4_sp_ll()@data$total_area)
-
-    crashes_to_plot <- crashes_filtered()
-    visualization_options <- c("Heatmap")
-    
-    print(nrow(crashes_to_plot))
     
     print(nrow(crashes_filtered()))
-    
-    if (nrow(crashes_to_plot) < 2000) {
-      visualization_options <- c(visualization_options, "Markers")
-    }
 
-    if (nrow(crashes_to_plot > 0)) {
-
-      map <- leaflet(data = crashes_to_plot) %>%
-        setView(lat = 51.96, lng = 7.62, zoom = 12) %>%
-        addProviderTiles(provider = "Esri.WorldImagery", group = "Terrain") %>%
-        addProviderTiles(provider = "CartoDB.Positron", group = "schematisch") %>%
-        addMarkers(lng = ~longitude,
-                   lat = ~latitude,
-                   popup = paste0(crashes_filtered()$tag,
-                                 ", ", crashes_filtered()$datum,
-                                 ", ", crashes_filtered()$uhrzeit,
-                                 ", id: ", crashes_filtered()$id,
-                                 ", ", crashes_filtered()$vu_ort,
-                                 " ", crashes_filtered()$vu_hoehe,
-                                 ",<br>Tote: ", crashes_filtered()$t,
-                                 ", Schwerverletzte: ", crashes_filtered()$sv,
-                                 ", Leichtverletzte: ", crashes_filtered()$lv,
-                                 ",<br>PKW: ", crashes_filtered()$pkw,
-                                 ", LKW: ", crashes_filtered()$lkw,
-                                 ", Fußgänger: ", crashes_filtered()$fg,
-                                 ", Fahrräder: ", crashes_filtered()$rf,
-                                 ", sonstige Verkehrsmittel : ", crashes_filtered()$mofa +
-                                   crashes_filtered()$kkr +
-                                   crashes_filtered()$krad +
-                                   crashes_filtered()$kom +
-                                   crashes_filtered()$sonstige),
-                   group = "Markers") %>%
-        addWebGLHeatmap(lng = ~longitude,
-                        lat = ~latitude,
-                        # intensity = 0.5, TODO use interactively with slider
-                        size = 500, units = "m",
-                        group = "Heatmap") %>%
-        ### Groups
-        hideGroup("Markers") %>% 
-        hideGroup("Terrain") %>%
-        showGroup("schematisch)") %>%
-        # Layers control
-        addLayersControl(
-          baseGroups = c("Terrain",
-                         "schematisch"),
-          overlayGroups = visualization_options,
-          options = layersControlOptions(collapsed = FALSE)
-        )
-
-    } else {
-      map <- leaflet() %>%
-        setView(lat = 51.96, lng = 7.62, zoom = 12) %>%
-        addProviderTiles(provider = "Esri.WorldImagery", group = "Terrain") %>%
-        addProviderTiles(provider = "OpenStreetMap.BlackAndWhite", group = "OSM (B & W)") %>%
-        hideGroup("Terrain") %>%
-        showGroup("OSM (B & W)") %>%
-        # Layers control
-        addLayersControl(
-          baseGroups = c("Terrain",
-                         "OSM (B & W)"),
-          options = layersControlOptions(collapsed = FALSE)
-        )
-    }
-
-    map
+    leaflet(data = crashes_filtered()) %>%
+      setView(lat = 51.96, lng = 7.62, zoom = 12) %>%
+      addProviderTiles(provider = "CartoDB.Positron", group = "schematisch") #%>% 
+      # Layers control
+      # addLayersControl(
+      #   overlayGroups = c("Markers", "Heatmap"),
+      #   options = layersControlOptions(collapsed = FALSE)
+      # )
+  })
+  
+  # heatmap observe
+  heatmap_static_size <- eventReactive(input$QueryBtn, {
+    input$heatmap_size
   })
 
-   output$crashes_table <- DT::renderDataTable({
+  observe({
+    proxy <- leafletProxy("karte", data = crashes_filtered())
+    
+    if (input$heatmap_toggle) {
+      proxy %>% 
+        clearGroup("Heatmap") %>% 
+         addWebGLHeatmap(lng = ~longitude,
+                        lat = ~latitude,
+                        intensity = 0.5,
+                        size = heatmap_static_size(), units = "m",
+                        group = "Heatmap") %>%
+        showGroup("Heatmap")
+    } else {
+      proxy %>% 
+        clearGroup("Heatmap")
+    }
+  })
+  
+  # marker observe
+  observe({
+    proxy <- leafletProxy("karte", data = crashes_filtered())
+    if (input$markers_toggle) {
+      proxy %>% 
+        clearGroup("Markers") %>% 
+        addMarkers(lng = ~longitude,
+           lat = ~latitude,
+           popup = paste0(crashes_filtered()$tag,
+                         ", ", crashes_filtered()$datum,
+                         ", ", crashes_filtered()$uhrzeit,
+                         ", id: ", crashes_filtered()$id,
+                         ", ", crashes_filtered()$vu_ort,
+                         " ", crashes_filtered()$vu_hoehe,
+                         ",<br>Tote: ", crashes_filtered()$t,
+                         ", Schwerverletzte: ", crashes_filtered()$sv,
+                         ", Leichtverletzte: ", crashes_filtered()$lv,
+                         ",<br>PKW: ", crashes_filtered()$pkw,
+                         ", LKW: ", crashes_filtered()$lkw,
+                         ", Fußgänger:", crashes_filtered()$fg,
+                         ", Fahrräder: ", crashes_filtered()$rf,
+                         ", sonstige Verkehrsmittel : ", crashes_filtered()$mofa +
+                           crashes_filtered()$kkr +
+                           crashes_filtered()$krad +
+                           crashes_filtered()$kom +
+                           crashes_filtered()$sonstige),
+           group = "Markers") %>%
+        showGroup("Markers")
+    } else {
+      proxy %>% 
+        clearGroup("Markers")
+    }
+    
+  })
+
+  output$crashes_table <- DT::renderDataTable({
     all_crashes <- dbGetQuery(db_con, "SELECT * FROM unfalldaten_raw")
 
     DT::datatable(all_crashes, options = list(orderClasses = TRUE))

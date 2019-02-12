@@ -12,22 +12,22 @@ ui <- navbarPage("Münsteraner Verkehrsunfälle", id = "nav",
             div(h5("Beta-Version, Feedback willkommen!")),
             withSpinner(leafletOutput("karte")),
             textOutput("number_of_crashes"),
-   				 	wellPanel(
-   				 	  column(2,
-					   				 selectizeInput(
-														"vehicles",
-														"Unfallbeteiligte",
-														choices = c("Fuß" = "ped", 
-														            "Rad" = "bike", 
-														            "PKW" = "car", 
-														            "LKW" = "truck", 
-														            "sonstiges" = "rest"),
-														selected = c("bike", "car"),
-														multiple = TRUE, 
-														options = list(
-														  'plugins' = list('remove_button'))
-														)
-					   				 ),
+            wellPanel(
+              column(2,
+                     selectizeInput(
+                       "vehicles",
+                       "Unfallbeteiligte",
+                       choices = c("Fuß" = "ped", 
+                                   "Rad" = "bike", 
+                                   "PKW" = "car",
+                                   "LKW" = "truck", 
+                                   "sonstiges" = "rest"),
+                       selected = c("bike", "car"),
+                       multiple = TRUE, 
+                       options = list(
+                         'plugins' = list('remove_button'))
+                       )
+                     ),
    				 	  column(2,
    				 		       selectizeInput(
    				 		         "injured",
@@ -106,18 +106,21 @@ ui <- navbarPage("Münsteraner Verkehrsunfälle", id = "nav",
 							  )
 							)
    				 	  ),
-#    				 		column(2,
-#    				 					 selectizeInput(
-# 											"hit_and_run",
-# 											"Fahrerflucht?",
-# 											choices = c("ja" = "yes", "nein" = "no", "egal" = "all"),
-# 											selected = "all",
-# 											multiple = FALSE, options = list(
-# 											  'plugins' = list('remove_button'))
-# 											)
-#    				 		)
-#   				 	),
    				 	wellPanel(
+   				 	  	column(2,
+							       sliderInput(
+							         "heatmap_size",
+							         "Heatmap-Größe (in m)",
+							         min = 0, max = 1000,
+							         value = 100
+							      ),
+							      checkboxInput("heatmap_toggle",
+							                    "Heatmap",
+							                    value = FALSE),
+							      checkboxInput("markers_toggle",
+							                    "Markers",
+							                    value = TRUE)
+   				 	  	),
    				 	  actionButton("QueryBtn", "Aktualisieren", icon = icon("refresh"))
    				 	)
     ),
