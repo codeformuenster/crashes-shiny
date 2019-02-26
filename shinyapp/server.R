@@ -115,7 +115,6 @@ server <- function(input, output, session) {
                          " AND EXTRACT(hours from parsed_timestamp) >= ", input$hour_filter[1],
                          " AND EXTRACT(hours from parsed_timestamp) < ", input$hour_filter[2],
                          " AND EXTRACT(dow from parsed_timestamp) in ", weekdays_filter,
-                         # if_else(vehicle_filter, " AND (", ""),
                          if_else(ped_filter, " AND REGEXP_REPLACE(COALESCE(fg, '0'), '[^0-9]*' ,'0')::integer > 0", ""),
                          if_else(bike_filter, " AND REGEXP_REPLACE(COALESCE(rf, '0'), '[^0-9]*' ,'0')::integer > 0", ""),
                          if_else(car_filter, " AND REGEXP_REPLACE(COALESCE(pkw, '0'), '[^0-9]*' ,'0')::integer > 0", ""),
@@ -125,18 +124,21 @@ server <- function(input, output, session) {
                          "   + REGEXP_REPLACE(COALESCE(krad, '0'), '[^0-9]*' ,'0')::integer ",
                          "   + REGEXP_REPLACE(COALESCE(kom, '0'), '[^0-9]*' ,'0')::integer ",
                          "   + REGEXP_REPLACE(COALESCE(sonstige, '0'), '[^0-9]*' ,'0')::integer) > 0"), ""),
-                         if_else(slightly_filter, " AND REGEXP_REPLACE(COALESCE(lv, '0'), '[^0-9]*' ,'0')::integer > 0", ""),
-                         if_else(seriously_filter," AND REGEXP_REPLACE(COALESCE(sv, '0'), '[^0-9]*' ,'0')::integer > 0", ""),
-                         if_else(dead_filter," AND REGEXP_REPLACE(COALESCE(t, '0'), '[^0-9]*' ,'0')::integer > 0", "")
+                         if_else(slightly_filter | seriously_filter | dead_filter, "AND (", ""),
+                         if_else(slightly_filter, " REGEXP_REPLACE(COALESCE(lv, '0'), '[^0-9]*' ,'0')::integer > 0", ""),
+                         if_else(slightly_filter & seriously_filter, " OR ", ""),
+                         if_else(seriously_filter," REGEXP_REPLACE(COALESCE(sv, '0'), '[^0-9]*' ,'0')::integer > 0", ""),
+                         if_else((slightly_filter | seriously_filter) & dead_filter, " OR ", ""),
+                         if_else(dead_filter," REGEXP_REPLACE(COALESCE(t, '0'), '[^0-9]*' ,'0')::integer > 0", ""),
+                         if_else(slightly_filter | seriously_filter | dead_filter, ")", "")
                         )
-                        #" LIMIT 20000;")
-
+    
     print(sql_string)
-
+    
     filtered <- dbGetQuery(db_con, sql_string)
-
+    
     print(head(filtered))
-
+    
     if (nrow(filtered) > 0) {
 
       filtered <- filtered %>%
@@ -186,55 +188,57 @@ server <- function(input, output, session) {
 
   observe({
     proxy <- leafletProxy("karte", data = crashes_filtered())
-    
-    if (input$heatmap_toggle) {
-      proxy %>% 
-        clearGroup("Heatmap") %>% 
-         addWebGLHeatmap(lng = ~longitude,
-                        lat = ~latitude,
-                        intensity = 0.5,
-                        size = heatmap_static_size(), units = "m",
-                        group = "Heatmap") %>%
-        showGroup("Heatmap")
-    } else {
-      proxy %>% 
-        clearGroup("Heatmap")
+    if (length(crashes_filtered()) > 0) {
+      if (input$heatmap_toggle) {
+        proxy %>% 
+          clearGroup("Heatmap") %>% 
+           addWebGLHeatmap(lng = ~longitude,
+                          lat = ~latitude,
+                          intensity = 0.5,
+                          size = heatmap_static_size(), units = "m",
+                          group = "Heatmap") %>%
+          showGroup("Heatmap")
+      } else {
+        proxy %>% 
+          clearGroup("Heatmap")
+      }
     }
   })
   
   # marker observe
   observe({
     proxy <- leafletProxy("karte", data = crashes_filtered())
-    if (input$markers_toggle) {
-      proxy %>% 
-        clearGroup("Markers") %>% 
-        addMarkers(lng = ~longitude,
-           lat = ~latitude,
-           popup = paste0(crashes_filtered()$tag,
-                         ", ", crashes_filtered()$datum,
-                         ", ", crashes_filtered()$uhrzeit,
-                         ", id: ", crashes_filtered()$id,
-                         ", ", crashes_filtered()$vu_ort,
-                         " ", crashes_filtered()$vu_hoehe,
-                         ",<br>Tote: ", crashes_filtered()$t,
-                         ", Schwerverletzte: ", crashes_filtered()$sv,
-                         ", Leichtverletzte: ", crashes_filtered()$lv,
-                         ",<br>PKW: ", crashes_filtered()$pkw,
-                         ", LKW: ", crashes_filtered()$lkw,
-                         ", Fußgänger:", crashes_filtered()$fg,
-                         ", Fahrräder: ", crashes_filtered()$rf,
-                         ", sonstige Verkehrsmittel : ", crashes_filtered()$mofa +
-                           crashes_filtered()$kkr +
-                           crashes_filtered()$krad +
-                           crashes_filtered()$kom +
-                           crashes_filtered()$sonstige),
-           group = "Markers") %>%
-        showGroup("Markers")
-    } else {
-      proxy %>% 
-        clearGroup("Markers")
+    if (length(crashes_filtered()) > 0) {
+      if (input$markers_toggle) {
+        proxy %>% 
+          clearGroup("Markers") %>% 
+          addMarkers(lng = ~longitude,
+             lat = ~latitude,
+             popup = paste0(crashes_filtered()$tag,
+                           ", ", crashes_filtered()$datum,
+                           ", ", crashes_filtered()$uhrzeit,
+                           ", id: ", crashes_filtered()$id,
+                           ", ", crashes_filtered()$vu_ort,
+                           " ", crashes_filtered()$vu_hoehe,
+                           ",<br>Tote: ", crashes_filtered()$t,
+                           ", Schwerverletzte: ", crashes_filtered()$sv,
+                           ", Leichtverletzte: ", crashes_filtered()$lv,
+                           ",<br>PKW: ", crashes_filtered()$pkw,
+                           ", LKW: ", crashes_filtered()$lkw,
+                           ", Fußgänger:", crashes_filtered()$fg,
+                           ", Fahrräder: ", crashes_filtered()$rf,
+                           ", sonstige Verkehrsmittel : ", crashes_filtered()$mofa +
+                             crashes_filtered()$kkr +
+                             crashes_filtered()$krad +
+                             crashes_filtered()$kom +
+                             crashes_filtered()$sonstige),
+             group = "Markers") %>%
+          showGroup("Markers")
+      } else {
+        proxy %>% 
+          clearGroup("Markers")
+      }
     }
-    
   })
 
   output$crashes_table <- DT::renderDataTable({
