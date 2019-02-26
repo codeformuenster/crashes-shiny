@@ -2,7 +2,7 @@ library(shiny)
 
 # Define server logic required to draw the map
 server <- function(input, output, session) {
-
+  
   # open connection to database
   db_con <- dbConnect(dbDriver("PostgreSQL"), dbname = "ms_unfaelle",
                     host = Sys.getenv("POSTGRES_HOST"), port = 5432,
@@ -20,7 +20,7 @@ server <- function(input, output, session) {
     return(ifelse(is.na(as.numeric(text)), 0, as.numeric(text)))
   }
 
-  crashes_filtered <- eventReactive(input$QueryBtn, ignoreNULL = FALSE, {
+  crashes_filtered <- eventReactive(input$update_button, ignoreNULL = FALSE, {
     # filter involved vehicles
     
     ped_filter <- FALSE
@@ -142,7 +142,6 @@ server <- function(input, output, session) {
     if (nrow(filtered) > 0) {
 
       filtered <- filtered %>%
-        # mutate(flucht = if_else(flucht == "", FALSE, TRUE)) %>%
         mutate(sv = text_to_number(sv)) %>%
         mutate(lv = text_to_number(lv)) %>%
         mutate(t = text_to_number(t)) %>%
@@ -181,12 +180,8 @@ server <- function(input, output, session) {
       # )
   })
   
-  # heatmap observe
-  heatmap_static_size <- eventReactive(input$QueryBtn, {
-    input$heatmap_size
-  })
-
-  observe({
+  # observe heatmap, ignoreNULL is to have this executed at the start
+  observeEvent(input$update_button, ignoreNULL = FALSE, {
     proxy <- leafletProxy("karte", data = crashes_filtered())
     if (length(crashes_filtered()) > 0) {
       if (input$heatmap_toggle) {
@@ -195,7 +190,7 @@ server <- function(input, output, session) {
            addWebGLHeatmap(lng = ~longitude,
                           lat = ~latitude,
                           intensity = 0.5,
-                          size = heatmap_static_size(), units = "m",
+                          size = input$heatmap_size, units = "m",
                           group = "Heatmap") %>%
           showGroup("Heatmap")
       } else {
@@ -205,8 +200,8 @@ server <- function(input, output, session) {
     }
   })
   
-  # marker observe
-  observe({
+  # marker observe, ignoreNULL is to have this executed at the start
+  observeEvent(input$update_button, ignoreNULL = FALSE, {
     proxy <- leafletProxy("karte", data = crashes_filtered())
     if (length(crashes_filtered()) > 0) {
       if (input$markers_toggle) {
