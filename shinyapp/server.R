@@ -15,7 +15,7 @@ server <- function(input, output, session) {
       dbDisconnect(db_con)
     }
   })
-
+  
   text_to_number <- function(text) {
     return(ifelse(is.na(as.numeric(text)), 0, as.numeric(text)))
   }
@@ -155,7 +155,7 @@ server <- function(input, output, session) {
         mutate(kom = text_to_number(kom)) %>%
         mutate(sonstige = text_to_number(sonstige))
     }
-
+    
     return(filtered)
   })
 
@@ -165,13 +165,12 @@ server <- function(input, output, session) {
 
   # LEAFLET -----------------------------------------------------------------
 
-  
   output$karte <- renderLeaflet({
     
     print(nrow(crashes_filtered()))
 
     leaflet(data = crashes_filtered()) %>%
-      setView(lat = 51.96, lng = 7.62, zoom = 12) %>%
+      setView(lat = 51.96, lng = 7.62, zoom = 13) %>%
       addProviderTiles(provider = "CartoDB.Positron", group = "schematisch") #%>% 
       # Layers control
       # addLayersControl(
