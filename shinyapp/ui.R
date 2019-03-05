@@ -9,7 +9,6 @@ options("spinner.type" = 4)
 ui <- navbarPage("Münsteraner Verkehrsunfälle", id = "nav",
                  
    tabPanel("Interaktive Karte",
-            div(h5("Beta-Version, Feedback willkommen!")),
             withSpinner(leafletOutput("karte")),
             textOutput("number_of_crashes"),
             fluidRow(
@@ -120,16 +119,14 @@ ui <- navbarPage("Münsteraner Verkehrsunfälle", id = "nav",
             ), # end tabPanel Karte
    
    tabPanel("Rohdaten",
-            div(h5("Beta-Version, Feedback willkommen!")),
             DT::dataTableOutput("crashes_table")
             ),
    
    tabPanel("Über diese Seite",
-            div(h5("Beta-Version, Feedback willkommen!")),
             h4("Datenquelle"),
             p("Dank einer Anfrage bei der Polizei Münster über ",
               a(href = "https://fragdenstaat.de/anfrage/rohdaten-der-verkehrsunfallstatistik-munster/", target = "_blank", "Frag den Staat"),
-              "sind wir an Rohdaten der Verkehsunfälle der Jahre 2007 bis 2016 gekommen. Nach mehreren Versuchen ist es uns gelungen, die zwischen den Jahren unterschiedlichen Spaltennamen und Formate in eine Datenbank zu laden um sie zu visualisieren und einfach zugänglich zu machen. Bedauerlicherweise werden die Orte der Verkehrsunfälle in einem schwer maschinenlesbaren Format aufgenommen (z.B.: 'Kappenberger Damm, Höhe Kriegerweg'). Wir haben es uns nun zur Aufgabe gemacht alle Unfälle durchzugehen und den korrekten Ort einzupflegen. Momentan sind weder alle Daten visualisiert noch kann für die Korrektheit der Daten garantiert werden."),
+              "sind wir an Rohdaten der Verkehrsunfälle der Jahre 2007 bis 2014 gekommen. Die Daten ab 2015 haben wir dankenswerterweise über den ADFC bekommen. Nach mehreren Versuchen ist es uns gelungen, die zwischen den Jahren unterschiedlichen Spaltennamen und Formate in eine Datenbank zu laden um sie zu visualisieren und einfach zugänglich zu machen. Bedauerlicherweise werden die Orte der Verkehrsunfälle in einem schwer maschinenlesbaren Format aufgenommen (z.B.: 'Kappenberger Damm, Höhe Kriegerweg'). Wir haben es uns nun zur Aufgabe gemacht alle Unfälle durchzugehen und den korrekten Ort einzupflegen. Momentan sind weder alle Daten visualisiert noch kann für die Korrektheit der Daten garantiert werden."),
             p("Die Rohdaten lassen sich ", a(href = "https://github.com/codeformuenster/open-data/tree/master/Unfallstatistiken", target = "_blank", "hier herunterladen.")),
             h4("Lizenz des Quelltexts"),
             p("Ein Projekt von ",
