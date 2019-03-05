@@ -166,17 +166,16 @@ server <- function(input, output, session) {
   # LEAFLET -----------------------------------------------------------------
 
   output$karte <- renderLeaflet({
-    
-    print(nrow(crashes_filtered()))
-
-    leaflet(data = crashes_filtered()) %>%
-      setView(lat = 51.96, lng = 7.62, zoom = 13) %>%
-      addProviderTiles(provider = "CartoDB.Positron", group = "schematisch") #%>% 
-      # Layers control
-      # addLayersControl(
-      #   overlayGroups = c("Markers", "Heatmap"),
-      #   options = layersControlOptions(collapsed = FALSE)
-      # )
+    if (length(crashes_filtered()) > 0) {
+      leaflet(data = crashes_filtered()) %>%
+        setView(lat = 51.96, lng = 7.62, zoom = 13) %>%
+        addProviderTiles(provider = "CartoDB.Positron", group = "schematisch")
+    } else {
+      leaflet() %>%
+         addPopups(lat = 51.96, lng = 7.62,
+                   popup = "Es gibt keine Daten, die den aktuellen Filtereinstellungen entsprechen.", 
+                   options = popupOptions(closeButton = FALSE))
+    }
   })
   
   # observe heatmap, ignoreNULL is to have this executed at the start
