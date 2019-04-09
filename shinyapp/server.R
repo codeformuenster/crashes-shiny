@@ -104,34 +104,82 @@ server <- function(input, output, session) {
       weekdays_filter <- paste0("(", "'0',", "'1',", "'2',", "'3',", "'4',", "'5',", "'6'", ")")
     }
     
-    sql_string <- paste0("SELECT unfalldaten_raw.*,",
-                         " st_x(the_geom) as longitude, st_y(the_geom) as latitude,",
-                         " parsed_timestamp, parsed_german_weekday",
-                         " FROM unfalldaten_raw",
-                         " JOIN unfalldaten_geometries on unfalldaten_raw.id = unfalldaten_geometries.unfall_id",
-                         " JOIN unfalldaten_timestamps on unfalldaten_raw.id = unfalldaten_timestamps.unfall_id",
-                         " WHERE EXTRACT(year from parsed_timestamp) in ", year_filter,
-                         " AND EXTRACT(month from parsed_timestamp) in ", month_filter,
-                         " AND EXTRACT(hours from parsed_timestamp) >= ", input$hour_filter[1],
-                         " AND EXTRACT(hours from parsed_timestamp) < ", input$hour_filter[2],
-                         " AND EXTRACT(dow from parsed_timestamp) in ", weekdays_filter,
-                         if_else(ped_filter, " AND REGEXP_REPLACE(COALESCE(fg, '0'), '[^0-9]*' ,'0')::integer > 0", ""),
-                         if_else(bike_filter, " AND REGEXP_REPLACE(COALESCE(rf, '0'), '[^0-9]*' ,'0')::integer > 0", ""),
-                         if_else(car_filter, " AND REGEXP_REPLACE(COALESCE(pkw, '0'), '[^0-9]*' ,'0')::integer > 0", ""),
-                         if_else(truck_filter, " AND REGEXP_REPLACE(COALESCE(lkw, '0'), '[^0-9]*' ,'0')::integer > 0", ""),
-                         if_else(rest_filter, paste0(" AND (REGEXP_REPLACE(COALESCE(mofa, '0'), '[^0-9]*' ,'0')::integer ",
-                         "   + REGEXP_REPLACE(COALESCE(kkr, '0'), '[^0-9]*' ,'0')::integer ",
-                         "   + REGEXP_REPLACE(COALESCE(krad, '0'), '[^0-9]*' ,'0')::integer ",
-                         "   + REGEXP_REPLACE(COALESCE(kom, '0'), '[^0-9]*' ,'0')::integer ",
-                         "   + REGEXP_REPLACE(COALESCE(sonstige, '0'), '[^0-9]*' ,'0')::integer) > 0"), ""),
-                         if_else(slightly_filter | seriously_filter | dead_filter, "AND (", ""),
-                         if_else(slightly_filter, " REGEXP_REPLACE(COALESCE(lv, '0'), '[^0-9]*' ,'0')::integer > 0", ""),
-                         if_else(slightly_filter & seriously_filter, " OR ", ""),
-                         if_else(seriously_filter," REGEXP_REPLACE(COALESCE(sv, '0'), '[^0-9]*' ,'0')::integer > 0", ""),
-                         if_else((slightly_filter | seriously_filter) & dead_filter, " OR ", ""),
-                         if_else(dead_filter," REGEXP_REPLACE(COALESCE(t, '0'), '[^0-9]*' ,'0')::integer > 0", ""),
-                         if_else(slightly_filter | seriously_filter | dead_filter, ")", "")
-                        )
+    # old database; use for inspiration for new sql query below
+    # sql_string <- paste0("SELECT unfalldaten_raw.*,",
+    #                      " st_x(the_geom) as longitude, st_y(the_geom) as latitude,",
+    #                      " parsed_timestamp, parsed_german_weekday",
+    #                      " FROM unfalldaten_raw",
+    #                      " JOIN unfalldaten_geometries on unfalldaten_raw.id = unfalldaten_geometries.unfall_id",
+    #                      " JOIN unfalldaten_timestamps on unfalldaten_raw.id = unfalldaten_timestamps.unfall_id",
+    #                      " WHERE EXTRACT(year from parsed_timestamp) in ", year_filter,
+    #                      " AND EXTRACT(month from parsed_timestamp) in ", month_filter,
+    #                      " AND EXTRACT(hours from parsed_timestamp) >= ", input$hour_filter[1],
+    #                      " AND EXTRACT(hours from parsed_timestamp) < ", input$hour_filter[2],
+    #                      " AND EXTRACT(dow from parsed_timestamp) in ", weekdays_filter,
+    #                      if_else(ped_filter, " AND REGEXP_REPLACE(COALESCE(fg, '0'), '[^0-9]*' ,'0')::integer > 0", ""),
+    #                      if_else(bike_filter, " AND REGEXP_REPLACE(COALESCE(rf, '0'), '[^0-9]*' ,'0')::integer > 0", ""),
+    #                      if_else(car_filter, " AND REGEXP_REPLACE(COALESCE(pkw, '0'), '[^0-9]*' ,'0')::integer > 0", ""),
+    #                      if_else(truck_filter, " AND REGEXP_REPLACE(COALESCE(lkw, '0'), '[^0-9]*' ,'0')::integer > 0", ""),
+    #                      if_else(rest_filter, paste0(" AND (REGEXP_REPLACE(COALESCE(mofa, '0'), '[^0-9]*' ,'0')::integer ",
+    #                      "   + REGEXP_REPLACE(COALESCE(kkr, '0'), '[^0-9]*' ,'0')::integer ",
+    #                      "   + REGEXP_REPLACE(COALESCE(krad, '0'), '[^0-9]*' ,'0')::integer ",
+    #                      "   + REGEXP_REPLACE(COALESCE(kom, '0'), '[^0-9]*' ,'0')::integer ",
+    #                      "   + REGEXP_REPLACE(COALESCE(sonstige, '0'), '[^0-9]*' ,'0')::integer) > 0"), ""),
+    #                      if_else(slightly_filter | seriously_filter | dead_filter, "AND (", ""),
+    #                      if_else(slightly_filter, " REGEXP_REPLACE(COALESCE(lv, '0'), '[^0-9]*' ,'0')::integer > 0", ""),
+    #                      if_else(slightly_filter & seriously_filter, " OR ", ""),
+    #                      if_else(seriously_filter," REGEXP_REPLACE(COALESCE(sv, '0'), '[^0-9]*' ,'0')::integer > 0", ""),
+    #                      if_else((slightly_filter | seriously_filter) & dead_filter, " OR ", ""),
+    #                      if_else(dead_filter," REGEXP_REPLACE(COALESCE(t, '0'), '[^0-9]*' ,'0')::integer > 0", ""),
+    #                      if_else(slightly_filter | seriously_filter | dead_filter, ")", "")
+    #                     )
+    # 
+    
+    sql_string <- 
+      paste("WITH geo AS",
+             "(SELECT",
+             "(data->>'lat')::float as latitude,",
+             "(data->>'lon')::float as longitude,",
+             "data->>'accident_id' as accident_id",
+             "FROM objects WHERE parent_id = '/buckets/accidents/collections/geometries'",
+             "AND resource_name = 'record')",
+             "SELECT",
+            # date does not yet work in the database but should somehow like this
+         #    "date_part('year', date(data->>'date')) AS year,",
+        #     "date_part('month', date(data->>'date')) AS month,",
+        #     "date_part('hour', TO_TIMESTAMP(data->>'time_of_day', 'HH24:MI:SS')::TIME) as hour,",
+        #     "date_part('dow', date(data->>'date')) AS german_weekday,",
+            "data->>'deaths' as deaths,",
+            "data->>'seriously_injured' as sv,",
+            "data->>'slightly_injured' as lv,",
+            "data->>'car' as car,",
+            "data->>'lorry' as lorry,",
+            "data->>'pedestrian' as pedestrian,",
+            "data->>'bicycle' as bicycle,",
+             "geo.latitude, geo.longitude",
+             "FROM objects JOIN geo ON objects.id = geo.accident_id",
+             "WHERE parent_id = '/buckets/accidents/collections/accidents_raw'",
+             "AND resource_name = 'record'",
+            # date does not yet work in the database but should somehow like this
+            # "AND date_part('year', date(data->>'date')) in ", year_filter,
+          #  "AND date_part('month', date(data->>'date')) in ", month_filter,
+          #  "AND date_part('dow', date(data->>'date')) in ", weekdays_filter,
+          #  "AND date_part('hour', TO_TIMESTAMP(data->>'time_of_day', 'HH24:MI:SS')::TIME) >= ", input$hour_filter[1],
+          #  "AND date_part('hour', TO_TIMESTAMP(data->>'time_of_day', 'HH24:MI:SS')::TIME) < ", input$hour_filter[2],
+            if_else(car_filter, " AND data->>'car' <> 'None'", ""),
+            if_else(ped_filter," AND data->>'pedestrian' <> 'None'", ""),
+            if_else(bike_filter, " AND data->>'bicycle' <> 'None'", ""),
+            if_else(truck_filter, " AND data->>'lorry' <> 'None'", ""),
+            # TODO add rest_filter (adding all the remaining vehicles, see above)
+            if_else(slightly_filter | seriously_filter | dead_filter, "AND (", ""),
+            if_else(slightly_filter, " data->>'slightly_injured' <> 'None'", ""),
+            if_else(slightly_filter & seriously_filter, " OR ", ""),
+            if_else(seriously_filter," data->>'seriously_injured' <> 'None'", ""),
+            if_else((slightly_filter | seriously_filter) & dead_filter, " OR ", ""),
+            if_else(dead_filter," data->>'deaths' <> 'None'", ""),
+            if_else(slightly_filter | seriously_filter | dead_filter, ")", ""),
+                       
+            "LIMIT 20")
     
     print(sql_string)
     
@@ -139,22 +187,24 @@ server <- function(input, output, session) {
     
     print(head(filtered))
     
-    if (nrow(filtered) > 0) {
-
-      filtered <- filtered %>%
-        mutate(sv = text_to_number(sv)) %>%
-        mutate(lv = text_to_number(lv)) %>%
-        mutate(t = text_to_number(t)) %>%
-        mutate(fg = text_to_number(fg)) %>%
-        mutate(rf = text_to_number(rf)) %>%
-        mutate(pkw = text_to_number(pkw)) %>%
-        mutate(lkw = text_to_number(lkw)) %>%
-        mutate(mofa = text_to_number(mofa)) %>%
-        mutate(kkr = text_to_number(kkr)) %>%
-        mutate(krad = text_to_number(krad)) %>%
-        mutate(kom = text_to_number(kom)) %>%
-        mutate(sonstige = text_to_number(sonstige))
-    }
+    # make database entries looking nice for interactive bubbles
+    # does not work with 'None' being no number
+    # if (nrow(filtered) > 0) {
+    # 
+    #   filtered <- filtered %>%
+    #     mutate(sv = text_to_number(sv)) %>%
+    #     mutate(lv = text_to_number(lv)) %>%
+    #     mutate(t = text_to_number(t)) %>%
+    #     mutate(fg = text_to_number(fg)) %>%
+    #     mutate(rf = text_to_number(rf)) %>%
+    #     mutate(pkw = text_to_number(pkw)) %>%
+    #     mutate(lkw = text_to_number(lkw)) %>%
+    #     mutate(mofa = text_to_number(mofa)) %>%
+    #     mutate(kkr = text_to_number(kkr)) %>%
+    #     mutate(krad = text_to_number(krad)) %>%
+    #     mutate(kom = text_to_number(kom)) %>%
+    #     mutate(sonstige = text_to_number(sonstige))
+    # }
     
     return(filtered)
   })
@@ -207,19 +257,20 @@ server <- function(input, output, session) {
           clearGroup("Markers") %>% 
           addMarkers(lng = ~longitude,
              lat = ~latitude,
+             # TODO update to new database fields
              popup = paste0(crashes_filtered()$tag,
                            ", ", crashes_filtered()$datum,
                            ", ", crashes_filtered()$uhrzeit,
                            ", id: ", crashes_filtered()$id,
                            ", ", crashes_filtered()$vu_ort,
                            " ", crashes_filtered()$vu_hoehe,
-                           ",<br>Tote: ", crashes_filtered()$t,
+                           ",<br>Tote: ", crashes_filtered()$deaths,
                            ", Schwerverletzte: ", crashes_filtered()$sv,
                            ", Leichtverletzte: ", crashes_filtered()$lv,
-                           ",<br>PKW: ", crashes_filtered()$pkw,
-                           ", LKW: ", crashes_filtered()$lkw,
-                           ", Fußgänger:", crashes_filtered()$fg,
-                           ", Fahrräder: ", crashes_filtered()$rf,
+                           ",<br>PKW: ", crashes_filtered()$car,
+                           ", LKW: ", crashes_filtered()$lorry,
+                           ", Fußgänger: ", crashes_filtered()$pedestrian,
+                           ", Fahrräder: ", crashes_filtered()$bicycle,
                            ", sonstige Verkehrsmittel : ", crashes_filtered()$mofa +
                              crashes_filtered()$kkr +
                              crashes_filtered()$krad +
