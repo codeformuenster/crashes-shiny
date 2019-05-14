@@ -40,16 +40,23 @@ ui <- navbarPage("Münsteraner Verkehrsunfälle", id = "nav",
                        ),
                      sliderInput(
                        "hour_filter",
-                       "Wähle Uhrzeit:",
+                       "Uhrzeit:",
                        min = 0,
                        max = 24,
                        value = c(0, 24)
                        )
                      ),
               column(3,
+                     sliderInput(
+                       "age_filter",
+                       "Alter:",
+                       min = 0,
+                       max = 100,
+                       value = c(0, 100)
+                       ),
                      selectizeInput(
                        "years",
-                       "Wähle Jahre:",
+                       "Jahre:",
                        selected = c(2018),
                        choices = list("2007", 
                                       "2008",
@@ -68,7 +75,7 @@ ui <- navbarPage("Münsteraner Verkehrsunfälle", id = "nav",
                        ),
                      selectizeInput(
                        "weekdays",
-                       "Wähle Wochentage:",
+                       "Wochentage:",
                        selected = c(0, 1, 2, 3, 4, 5, 6),
                        choices = weekdays_string_to_numbers, 
                        multiple = TRUE, options = list(
@@ -78,7 +85,7 @@ ui <- navbarPage("Münsteraner Verkehrsunfälle", id = "nav",
               column(3,
                      selectizeInput(
                        "months",
-                       "Wähle Monate:",
+                       "Monate:",
                        selected = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12),
                        choices = list("Januar" = 1, 
                                       "Februar" = 2, 
