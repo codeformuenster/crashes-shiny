@@ -53,31 +53,16 @@ ui <- navbarPage("Münsteraner Verkehrsunfälle", id = "nav",
                        )
                      ),
               column(3,
+                     checkboxInput(
+                       "bike_helmet",
+                       "Fahrradhelm?",
+                       value = FALSE),
                      sliderInput(
                        "hour_filter",
                        "Uhrzeit:",
                        min = 0,
                        max = 24,
                        value = c(0, 24)
-                       ),
-                     selectizeInput(
-                       "years",
-                       "Jahre:",
-                       selected = c(2018),
-                       choices = list("2007", 
-                                      "2008",
-                                      "2009",
-                                      "2010",
-                                      "2011",
-                                      "2012",
-                                      "2013",
-                                      "2014",
-                                      "2015",
-                                      "2016",
-                                      "2017",
-                                      "2018"),
-                       multiple = TRUE, options = list(
-                         'plugins' = list('remove_button'))
                        ),
                      selectizeInput(
                        "weekdays",
@@ -105,6 +90,25 @@ ui <- navbarPage("Münsteraner Verkehrsunfälle", id = "nav",
                                       "Oktober" = 10, 
                                       "November" = 11,
                                       "Dezember" = 12), 
+                       multiple = TRUE, options = list(
+                         'plugins' = list('remove_button'))
+                       ),
+                     selectizeInput(
+                       "years",
+                       "Jahre:",
+                       selected = c(2018),
+                       choices = list("2007", 
+                                      "2008",
+                                      "2009",
+                                      "2010",
+                                      "2011",
+                                      "2012",
+                                      "2013",
+                                      "2014",
+                                      "2015",
+                                      "2016",
+                                      "2017",
+                                      "2018"),
                        multiple = TRUE, options = list(
                          'plugins' = list('remove_button'))
                        )

@@ -129,6 +129,7 @@ server <- function(input, output, session) {
             "data->>'lorry' as lorry,",
             "data->>'pedestrian' as pedestrian,",
             "data->>'bicycle' as bicycle,",
+            "data->>'helmet' as bike_helmet,",
             "geo.latitude, geo.longitude",
             "FROM objects JOIN geo ON objects.id = geo.accident_id",
             "WHERE parent_id = '/buckets/accidents/collections/accidents_raw'",
@@ -138,7 +139,8 @@ server <- function(input, output, session) {
             "AND date_part('dow', date(data->>'date')) in ", weekdays_filter,
             "AND date_part('hour', TO_TIMESTAMP(data->>'time_of_day', 'HH24:MI:SS')::TIME) >= ", input$hour_filter[1],
             "AND date_part('hour', TO_TIMESTAMP(data->>'time_of_day', 'HH24:MI:SS')::TIME) < ", input$hour_filter[2],
-            "AND (data->>'number_of_participants')::integer = ", input$no_of_participants, 
+            "AND (data->>'number_of_participants')::integer = ", input$no_of_participants,
+            if_else(input$bike_helmet, "AND (data->>'helmet') like '%j%'", ""),
             "AND (((data->>'participants_age_01')::integer >= ", input$age_filter[1],
             "AND (data->>'participants_age_01')::integer <= ", input$age_filter[2], ")",
             "OR ((data->>'participants_age_02')::integer >= ", input$age_filter[1],
@@ -188,6 +190,12 @@ server <- function(input, output, session) {
                    options = popupOptions(closeButton = FALSE))
     }
   })
+  
+  observeEvent(input$bike_helmet, {
+      if (input$bike_helmet) {
+       updateSelectizeInput(session, "vehicles", selected = c(input$vehicles, "bike")) 
+      }
+    })
   
   # observe heatmap, ignoreNULL is to have this executed at the start
   observeEvent(input$update_button, ignoreNULL = FALSE, {
