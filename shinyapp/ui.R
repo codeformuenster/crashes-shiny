@@ -38,21 +38,27 @@ ui <- navbarPage("Münsteraner Verkehrsunfälle", id = "nav",
                          'plugins' = list('remove_button')
                          )
                        ),
-                     sliderInput(
-                       "hour_filter",
-                       "Uhrzeit:",
-                       min = 0,
-                       max = 24,
-                       value = c(0, 24)
-                       )
+                     selectInput(
+                       "no_of_participants",
+                       "Anzahl Beteiligter",
+                       choices = c(1, 2, 3, 4),
+                       selected = 2
                      ),
-              column(3,
                      sliderInput(
                        "age_filter",
                        "Alter:",
                        min = 0,
                        max = 100,
                        value = c(0, 100)
+                       )
+                     ),
+              column(3,
+                     sliderInput(
+                       "hour_filter",
+                       "Uhrzeit:",
+                       min = 0,
+                       max = 24,
+                       value = c(0, 24)
                        ),
                      selectizeInput(
                        "years",

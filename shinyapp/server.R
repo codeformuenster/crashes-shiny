@@ -112,6 +112,7 @@ server <- function(input, output, session) {
             "DISTINCT ON (geo.accident_id) geo.accident_id,",
             "data->>'participants_age_01' as age1,",
             "data->>'participants_age_02' as age2,",
+            "data->>'number_of_participants' as no_of_participants,",
             "date_part('year', date(data->>'date')) AS year,",
             "date_part('month', date(data->>'date')) AS month,",
             "date_part('hour', TO_TIMESTAMP(data->>'time_of_day', 'HH24:MI:SS')::TIME) as hour,",
@@ -137,6 +138,7 @@ server <- function(input, output, session) {
             "AND date_part('dow', date(data->>'date')) in ", weekdays_filter,
             "AND date_part('hour', TO_TIMESTAMP(data->>'time_of_day', 'HH24:MI:SS')::TIME) >= ", input$hour_filter[1],
             "AND date_part('hour', TO_TIMESTAMP(data->>'time_of_day', 'HH24:MI:SS')::TIME) < ", input$hour_filter[2],
+            "AND (data->>'number_of_participants')::integer = ", input$no_of_participants, 
             "AND (((data->>'participants_age_01')::integer >= ", input$age_filter[1],
             "AND (data->>'participants_age_01')::integer <= ", input$age_filter[2], ")",
             "OR ((data->>'participants_age_02')::integer >= ", input$age_filter[1],
@@ -248,7 +250,8 @@ server <- function(input, output, session) {
   })
 
   output$crashes_table <- DT::renderDataTable({
-    all_crashes <- dbGetQuery(db_con, "SELECT * FROM unfalldaten_raw")
+    # TODO update to proper table display
+    all_crashes <- dbGetQuery(db_con, "SELECT id, data FROM objects WHERE resource_name = 'record' AND parent_id = '/buckets/accidents/collections/accidents_raw';")
 
     DT::datatable(all_crashes, options = list(orderClasses = TRUE))
   })
