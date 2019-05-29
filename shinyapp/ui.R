@@ -135,7 +135,7 @@ ui <- navbarPage("Münsteraner Verkehrsunfälle", id = "nav",
    
    tabPanel("Rohdaten",
             p("Die Rohdaten lassen sich ", a(href = "https://github.com/codeformuenster/open-data/tree/master/Unfallstatistiken", target = "_blank", "hier (Ordner Rohdaten) herunterladen.")),
-            DT::dataTableOutput("crashes_table")
+            withSpinner(DT::dataTableOutput("crashes_table"))
             ),
    
    tabPanel("Über diese Seite",

@@ -153,7 +153,6 @@ server <- function(input, output, session) {
             if_else(ped_filter," AND data->>'pedestrian' > '0'", ""),
             if_else(bike_filter, " AND data->>'bicycle' > '0'", ""),
             if_else(truck_filter, " AND data->>'lorry' > '0'", ""),
-            # TODO add rest_filter (adding all the remaining vehicles, see above)
             if_else(rest_filter, paste0(" AND (((data->>'moped')::integer",
                                        " + (data->>'omnibus')::integer",
                                        " + (data->>'motorcycle')::integer",
