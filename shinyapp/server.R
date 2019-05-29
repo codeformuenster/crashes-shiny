@@ -124,10 +124,15 @@ server <- function(input, output, session) {
             "data->>'deaths' as deaths,",
             "data->>'seriously_injured' as sv,",
             "data->>'slightly_injured' as lv,",
-            "data->>'car' as car,",
-            "data->>'lorry' as lorry,",
-            "data->>'pedestrian' as pedestrian,",
-            "data->>'bicycle' as bicycle,",
+            "(data->>'car')::integer as car,",
+            "(data->>'lorry')::integer as lorry,",
+            "(data->>'pedestrian')::integer as pedestrian,",
+            "(data->>'bicycle')::integer as bicycle,",
+            "(data->>'moped')::integer as moped,",
+            "(data->>'omnibus')::integer as omnibus,",
+            "(data->>'motorcycle')::integer as motorcycle,",
+            "(data->>'small_moped')::integer as small_moped,",
+            "(data->>'other_road_user')::integer as other_road_user,",
             "data->>'helmet' as bike_helmet,",
             "geo.latitude, geo.longitude",
             "FROM objects JOIN geo ON objects.id = geo.accident_id",
@@ -149,11 +154,11 @@ server <- function(input, output, session) {
             if_else(bike_filter, " AND data->>'bicycle' > '0'", ""),
             if_else(truck_filter, " AND data->>'lorry' > '0'", ""),
             # TODO add rest_filter (adding all the remaining vehicles, see above)
-            # if_else(rest_filter, paste0(" AND (data->>'mofa'",
-            #                             "+ data->>'kkr'",
-            #                             "+ data->>'krad'",
-            #                             "+ data->>'kom'",
-            #                             "+ data->>'sonstige') > 0"), ""),
+            if_else(rest_filter, paste0(" AND (((data->>'moped')::integer",
+                                       " + (data->>'omnibus')::integer",
+                                       " + (data->>'motorcycle')::integer",
+                                       " + (data->>'small_moped')::integer",
+                                       " + (data->>'other_road_user')::integer) > '0')"), ""),
             if_else(slightly_filter | seriously_filter | dead_filter, "AND (", ""),
             if_else(slightly_filter, " data->>'slightly_injured' > '0'", ""),
             if_else(slightly_filter & seriously_filter, " OR ", ""),
@@ -241,11 +246,12 @@ server <- function(input, output, session) {
                            ", LKW: ", crashes_filtered()$lorry,
                            ", Fußgänger: ", crashes_filtered()$pedestrian,
                            ", Fahrräder: ", crashes_filtered()$bicycle,
-                           ", sonstige Verkehrsmittel : TODO", crashes_filtered()$mofa +
-                             crashes_filtered()$kkr +
-                             crashes_filtered()$krad +
-                             crashes_filtered()$kom +
-                             crashes_filtered()$sonstige,
+                           ", sonstige Verkehrsmittel: ", 
+                             crashes_filtered()$moped +
+                             crashes_filtered()$omnibus +
+                             crashes_filtered()$motorcycle +
+                             crashes_filtered()$small_moped +
+                             crashes_filtered()$other_road_user,
                            ", id: ", crashes_filtered()$accident_id),
              group = "Markers") %>%
           showGroup("Markers")
@@ -257,7 +263,6 @@ server <- function(input, output, session) {
   })
 
   output$crashes_table <- DT::renderDataTable({
-    # TODO update to proper table display
     all_crashes_json <- dbGetQuery(db_con, "SELECT id, data FROM objects WHERE resource_name = 'record' AND parent_id = '/buckets/accidents/collections/accidents_raw';")
     
     json_obj <- paste0("[", all_crashes_json$data, "]", collapse = "")
