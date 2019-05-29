@@ -1,5 +1,7 @@
 library(dplyr)
-library(RPostgreSQL)
+library(RPostgres)
+library(jsonlite)
+library(stringi)
 weekdays_string_to_numbers <- 
   list("Montag" = 1,
        "Dienstag" = 2,

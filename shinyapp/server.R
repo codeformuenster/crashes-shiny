@@ -4,7 +4,7 @@ library(shiny)
 server <- function(input, output, session) {
   
   # open connection to database
-  db_con <- dbConnect(dbDriver("PostgreSQL"), dbname = "postgres",
+  db_con <- dbConnect(RPostgres::Postgres(), dbname = "postgres",
                     host = Sys.getenv("POSTGRES_HOST"), port = 5432,
                     user = "postgres", password = "ms_unfaelle")
 
@@ -87,7 +87,6 @@ server <- function(input, output, session) {
     if (length(input$weekdays) > 0) {
       weekdays_filter <- "("
       for (widx in 1:length(input$weekdays)) {
-        print(widx)
       			if (widx != length(input$weekdays)) {
       				weekdays_filter <- paste0(weekdays_filter, "'" , input$weekdays[widx], "',")
       			} else {
@@ -168,7 +167,7 @@ server <- function(input, output, session) {
     filtered <- dbGetQuery(db_con, sql_string)
     
     print(head(filtered))
-    
+
     return(filtered)
   })
 
@@ -179,7 +178,7 @@ server <- function(input, output, session) {
   # LEAFLET -----------------------------------------------------------------
 
   output$karte <- renderLeaflet({
-    if (length(crashes_filtered()) > 0) {
+    if (nrow(crashes_filtered()) > 0) {
       leaflet(data = crashes_filtered()) %>%
         setView(lat = 51.96, lng = 7.62, zoom = 13) %>%
         addProviderTiles(provider = "CartoDB.Positron", group = "schematisch")
@@ -259,7 +258,15 @@ server <- function(input, output, session) {
 
   output$crashes_table <- DT::renderDataTable({
     # TODO update to proper table display
-    all_crashes <- dbGetQuery(db_con, "SELECT id, data FROM objects WHERE resource_name = 'record' AND parent_id = '/buckets/accidents/collections/accidents_raw';")
+    all_crashes_json <- dbGetQuery(db_con, "SELECT id, data FROM objects WHERE resource_name = 'record' AND parent_id = '/buckets/accidents/collections/accidents_raw';")
+    
+    json_obj <- paste0("[", all_crashes_json$data, "]", collapse = "")
+    json_obj <- stri_replace_all_fixed(json_obj, "][", ",")
+
+    all_crashes <- cbind(id = all_crashes_json$id, fromJSON(json_obj))
+    
+    # all_crashes <- cbind("id" = all_crashes_json$id, 
+    #                      as.data.frame(t(sapply(all_crashes_json$data, fromJSON, USE.NAMES = FALSE, simplify = "matrix"))))
 
     DT::datatable(all_crashes, options = list(orderClasses = TRUE))
   })
