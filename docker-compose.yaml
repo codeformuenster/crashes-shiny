@@ -8,4 +8,4 @@ services:
       - ./logs:/var/log/shiny-server
 
   postgis:
-    image: quay.io/codeformuenster/verkehrsunfaelle:2019-05-18
+    image: quay.io/codeformuenster/verkehrsunfaelle:2019-06-06
