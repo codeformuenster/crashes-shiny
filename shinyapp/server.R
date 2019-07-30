@@ -181,10 +181,25 @@ server <- function(input, output, session) {
 
   # LEAFLET -----------------------------------------------------------------
 
+  center <- reactive({
+    if (is.null(input$karte_center)) {
+      return(c(51.96, 7.62))
+    } else {
+      return(input$karte_center)
+    }
+  })
+  
+  zoom <- reactive({
+    if (is.null(input$karte_zoom)) {
+      return(13)
+    } else {
+      return(input$karte_zoom)
+    }
+  })
+  
   output$karte <- renderLeaflet({
     if (nrow(crashes_filtered()) > 0) {
       leaflet(data = crashes_filtered()) %>%
-        setView(lat = 51.96, lng = 7.62, zoom = 13) %>%
         addProviderTiles(provider = "CartoDB.Positron", group = "schematisch")
     } else {
       leaflet() %>%
@@ -212,7 +227,8 @@ server <- function(input, output, session) {
                           intensity = 0.5,
                           size = input$heatmap_size, units = "m",
                           group = "Heatmap") %>%
-          showGroup("Heatmap")
+          showGroup("Heatmap") %>% 
+          setView(lat = center()[1], lng = center()[2], zoom = zoom())
       } else {
         proxy %>% 
           clearGroup("Heatmap")
@@ -253,7 +269,8 @@ server <- function(input, output, session) {
                              crashes_filtered()$other_road_user,
                            ", id: ", crashes_filtered()$accident_id),
              group = "Markers") %>%
-          showGroup("Markers")
+          showGroup("Markers") %>% 
+          setView(lat = center()[1], lng = center()[2], zoom = zoom())
       } else {
         proxy %>% 
           clearGroup("Markers")
