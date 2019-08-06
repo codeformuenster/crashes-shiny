@@ -43,10 +43,14 @@ server <- function(input, output, session) {
     
     # filter injuries
     
+    no_injuries_filter <- FALSE
     slightly_filter <- FALSE
     seriously_filter <- FALSE
     dead_filter <- FALSE
     
+    if ("no_injuries" %in% input$injured) {
+      no_injuries_filter <- TRUE
+    }
     if ("slightly" %in% input$injured) {
       slightly_filter <- TRUE
     }
@@ -158,13 +162,17 @@ server <- function(input, output, session) {
                                        " + (data->>'motorcycle')::integer",
                                        " + (data->>'small_moped')::integer",
                                        " + (data->>'other_road_user')::integer) > '0')"), ""),
-            if_else(slightly_filter | seriously_filter | dead_filter, "AND (", ""),
+            if_else(no_injuries_filter | slightly_filter | seriously_filter | dead_filter, "AND (", ""),
+            if_else(no_injuries_filter, paste0(" (data->>'slightly_injured' = '0'",
+                              " AND data->>'seriously_injured' = '0'",
+                              " AND data->>'deaths' = '0')"), ""),
+            if_else(no_injuries_filter & slightly_filter, " OR ", ""),
             if_else(slightly_filter, " data->>'slightly_injured' > '0'", ""),
-            if_else(slightly_filter & seriously_filter, " OR ", ""),
+            if_else((no_injuries_filter | slightly_filter) & seriously_filter, " OR ", ""),
             if_else(seriously_filter," data->>'seriously_injured' > '0'", ""),
-            if_else((slightly_filter | seriously_filter) & dead_filter, " OR ", ""),
+            if_else((no_injuries_filter | slightly_filter | seriously_filter) & dead_filter, " OR ", ""),
             if_else(dead_filter," data->>'deaths' > '0'", ""),
-            if_else(slightly_filter | seriously_filter | dead_filter, ")", ""))
+            if_else(no_injuries_filter | slightly_filter | seriously_filter | dead_filter, ")", ""))
     
     print(sql_string)
     
