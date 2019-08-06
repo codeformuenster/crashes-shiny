@@ -196,12 +196,19 @@ server <- function(input, output, session) {
       return(input$karte_zoom)
     }
   })
-
+  
   update_map <- function(){
    renderLeaflet({
      if (nrow(crashes_filtered()) > 0) {
        leaflet(data = crashes_filtered()) %>%
-        addProviderTiles(provider = "CartoDB.Positron", group = "schematisch")
+        addProviderTiles(provider = "OpenStreetMap.DE", group = "schematisch") %>% 
+        addProviderTiles(provider = "Esri.WorldImagery", group = "Satellit") %>% 
+        addProviderTiles(provider = "OpenTopoMap", group = "topographisch") %>% 
+        # Layers control
+        addLayersControl(
+          baseGroups = c("schematisch", "Satellit", "topographisch"),
+          options = layersControlOptions(collapsed = FALSE)
+        )
     } else {
       leaflet() %>%
          addPopups(lat = 51.96, lng = 7.62,
