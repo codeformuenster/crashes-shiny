@@ -196,10 +196,11 @@ server <- function(input, output, session) {
       return(input$karte_zoom)
     }
   })
-  
-  output$karte <- renderLeaflet({
-    if (nrow(crashes_filtered()) > 0) {
-      leaflet(data = crashes_filtered()) %>%
+
+  update_map <- function(){
+   renderLeaflet({
+     if (nrow(crashes_filtered()) > 0) {
+       leaflet(data = crashes_filtered()) %>%
         addProviderTiles(provider = "CartoDB.Positron", group = "schematisch")
     } else {
       leaflet() %>%
@@ -207,13 +208,22 @@ server <- function(input, output, session) {
                    popup = "Es gibt keine Daten, die den aktuellen Filtereinstellungen entsprechen.", 
                    options = popupOptions(closeButton = FALSE))
     }
+    })
+  }
+  
+  output$karte <- update_map()
+  
+  observeEvent(input$reset_map_button, ignoreNULL = FALSE, {
+    proxy <- leafletProxy("karte", data = crashes_filtered()) %>% 
+      setView(lat = 51.96, lng = 7.62, zoom = 13)
+    update_map()
   })
   
   observeEvent(input$bike_helmet, {
-      if (input$bike_helmet) {
-       updateSelectizeInput(session, "vehicles", selected = c(input$vehicles, "bike")) 
-      }
-    })
+    if (input$bike_helmet) {
+     updateSelectizeInput(session, "vehicles", selected = c(input$vehicles, "bike")) 
+    }
+  })
   
   # observe heatmap, ignoreNULL is to have this executed at the start
   observeEvent(input$update_button, ignoreNULL = FALSE, {
@@ -291,6 +301,7 @@ server <- function(input, output, session) {
 
     DT::datatable(all_crashes, options = list(orderClasses = TRUE))
   })
+  
 }
 
 

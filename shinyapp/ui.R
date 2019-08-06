@@ -124,12 +124,14 @@ ui <- navbarPage("Münsteraner Verkehrsunfälle", id = "nav",
                                    "Markers",
                                    value = FALSE),
                      sliderInput(
-                       "heatmap_size",
-                       "Heatmap-Größe (in m)",
-                       min = 0, max = 1000,
-                       value = 300
-                       )
-                     ) # end column
+                        "heatmap_size",
+                        "Heatmap-Größe (in m)",
+                        min = 0, max = 1000,
+                        value = 300),
+                      actionButton("reset_map_button", 
+                                  "Karte zurücksetzen", 
+                                  icon = icon("search-minus"))
+                      ) # end column
               ) # end fluidRow
             ), # end tabPanel Karte
    
