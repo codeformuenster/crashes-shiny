@@ -243,6 +243,7 @@ server <- function(input, output, session) {
                           lat = ~latitude,
                           intensity = 0.5,
                           size = input$heatmap_size, units = "m",
+                          opacity = 0.75,
                           group = "Heatmap") %>%
           showGroup("Heatmap") %>% 
           setView(lat = center()[1], lng = center()[2], zoom = zoom())
