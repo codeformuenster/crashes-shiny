@@ -109,7 +109,10 @@ ui <- navbarPage("Münsteraner Verkehrsunfälle", id = "nav",
                                       "2018"),
                        multiple = TRUE, options = list(
                          'plugins' = list('remove_button'))
-                       )
+                       ),
+                     actionButton("years_button", 
+                                  "Alle Jahre", 
+                                  icon = icon("calendar-plus"))
                      ),
               column(3,
                      actionButton("update_button", 

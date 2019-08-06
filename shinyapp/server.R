@@ -297,6 +297,30 @@ server <- function(input, output, session) {
     }
   })
 
+  vars = reactiveValues(years_button_toggle = TRUE)
+
+  observeEvent(input$years_button, {
+    
+    if (vars$years_button_toggle) {
+      updateSelectizeInput(session, "years",
+                         selected = c("2007", "2008", "2009", "2010",
+                                      "2011", "2012", "2013", "2014",
+                                      "2015", "2016", "2017", "2018"))
+      updateActionButton(session, "years_button",
+                         label = "Nur letztes Jahr",
+                         icon = icon("calendar-minus"))
+    } else {
+      updateSelectizeInput(session, "years",
+                         selected = c("2018"))
+      updateActionButton(session, "years_button",
+                         label = "Alle Jahre",
+                         icon = icon("calendar-plus"))
+    }
+    isolate({
+      vars$years_button_toggle <- !vars$years_button_toggle
+    })
+  })
+  
   output$crashes_table <- DT::renderDataTable({
     all_crashes_json <- dbGetQuery(db_con, "SELECT id, data FROM objects WHERE resource_name = 'record' AND parent_id = '/buckets/accidents/collections/accidents_raw';")
     
