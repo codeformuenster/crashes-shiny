@@ -38,12 +38,6 @@ ui <- navbarPage("Münsteraner Verkehrsunfälle", id = "nav",
                          'plugins' = list('remove_button')
                          )
                        ),
-                     selectInput(
-                       "no_of_participants",
-                       "Anzahl Beteiligter",
-                       choices = c(1, 2, 3, 4),
-                       selected = 2
-                     ),
                      sliderInput(
                        "age_filter",
                        "Alter:",
@@ -56,6 +50,10 @@ ui <- navbarPage("Münsteraner Verkehrsunfälle", id = "nav",
                      checkboxInput(
                        "bike_helmet",
                        "Fahrradhelm?",
+                       value = FALSE),
+                      checkboxInput(
+                       "single_participant",
+                       "Alleinunfall",
                        value = FALSE),
                      sliderInput(
                        "hour_filter",
