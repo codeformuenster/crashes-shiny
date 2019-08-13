@@ -24,6 +24,7 @@ server <- function(input, output, session) {
     bike_filter <- FALSE
     car_filter <- FALSE
     truck_filter <- FALSE
+    bus_filter <- FALSE
     rest_filter <- FALSE
     
     if ("ped" %in% input$vehicles) {
@@ -38,6 +39,9 @@ server <- function(input, output, session) {
     if ("truck" %in% input$vehicles) {
       truck_filter <- TRUE
     }
+    if ("bus" %in% input$vehicles) {
+      bus_filter <- TRUE
+    }
     if ("rest" %in% input$vehicles) {
       rest_filter <- TRUE
     }
@@ -48,6 +52,7 @@ server <- function(input, output, session) {
     without_bike_filter <- FALSE
     without_car_filter <- FALSE
     without_truck_filter <- FALSE
+    without_bus_filter <- FALSE
     without_rest_filter <- FALSE
     
     if ("ped" %in% input$without_vehicles) {
@@ -61,6 +66,9 @@ server <- function(input, output, session) {
     }
     if ("truck" %in% input$without_vehicles) {
       without_truck_filter <- TRUE
+    }
+    if ("bus" %in% input$without_vehicles) {
+      without_bus_filter <- TRUE
     }
     if ("rest" %in% input$without_vehicles) {
       without_rest_filter <- TRUE
@@ -182,8 +190,8 @@ server <- function(input, output, session) {
             if_else(ped_filter," AND data->>'pedestrian' > '0'", ""),
             if_else(bike_filter, " AND data->>'bicycle' > '0'", ""),
             if_else(truck_filter, " AND data->>'lorry' > '0'", ""),
+            if_else(bus_filter, " AND data->>'omnibus' > '0'", ""),
             if_else(rest_filter, paste0(" AND (((data->>'moped')::integer",
-                                       " + (data->>'omnibus')::integer",
                                        " + (data->>'motorcycle')::integer",
                                        " + (data->>'small_moped')::integer",
                                        " + (data->>'other_road_user')::integer) > '0')"), ""),
@@ -191,8 +199,8 @@ server <- function(input, output, session) {
             if_else(without_ped_filter," AND data->>'pedestrian' = '0'", ""),
             if_else(without_bike_filter, " AND data->>'bicycle' = '0'", ""),
             if_else(without_truck_filter, " AND data->>'lorry' = '0'", ""),
+            if_else(without_bus_filter, " AND data->>'omnibus' = '0'", ""),
             if_else(without_rest_filter, paste0(" AND (((data->>'moped')::integer",
-                                       " + (data->>'omnibus')::integer",
                                        " + (data->>'motorcycle')::integer",
                                        " + (data->>'small_moped')::integer",
                                        " + (data->>'other_road_user')::integer) = '0')"), ""),
@@ -321,6 +329,7 @@ server <- function(input, output, session) {
                            ", Leichtverletzte: ", crashes_filtered()$lv,
                            ",<br>PKW: ", crashes_filtered()$car,
                            ", LKW: ", crashes_filtered()$lorry,
+                           ", Bus: ", crashes_filtered()$omnibus,
                            ", Fußgänger: ", crashes_filtered()$pedestrian,
                            ", Fahrräder: ", crashes_filtered()$bicycle,
                            ", sonstige Verkehrsmittel: ", 
