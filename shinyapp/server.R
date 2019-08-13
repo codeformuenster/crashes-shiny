@@ -17,14 +17,15 @@ server <- function(input, output, session) {
   })
   
   crashes_filtered <- eventReactive(input$update_button, ignoreNULL = FALSE, {
-    # filter involved vehicles
+    
+    # filter involved vehicles (with)
     
     ped_filter <- FALSE
     bike_filter <- FALSE
     car_filter <- FALSE
     truck_filter <- FALSE
     rest_filter <- FALSE
-
+    
     if ("ped" %in% input$vehicles) {
       ped_filter <- TRUE
     }
@@ -39,6 +40,30 @@ server <- function(input, output, session) {
     }
     if ("rest" %in% input$vehicles) {
       rest_filter <- TRUE
+    }
+    
+    # filter *not* involved vehicles (without)
+    
+    without_ped_filter <- FALSE
+    without_bike_filter <- FALSE
+    without_car_filter <- FALSE
+    without_truck_filter <- FALSE
+    without_rest_filter <- FALSE
+    
+    if ("ped" %in% input$without_vehicles) {
+      without_ped_filter <- TRUE
+    }
+    if ("bike" %in% input$without_vehicles) {
+      without_bike_filter <- TRUE
+    }
+    if ("car" %in% input$without_vehicles) {
+      without_car_filter <- TRUE
+    }
+    if ("truck" %in% input$without_vehicles) {
+      without_truck_filter <- TRUE
+    }
+    if ("rest" %in% input$without_vehicles) {
+      without_rest_filter <- TRUE
     }
     
     # filter injuries
@@ -162,6 +187,15 @@ server <- function(input, output, session) {
                                        " + (data->>'motorcycle')::integer",
                                        " + (data->>'small_moped')::integer",
                                        " + (data->>'other_road_user')::integer) > '0')"), ""),
+            if_else(without_car_filter, " AND data->>'car' = '0'", ""),
+            if_else(without_ped_filter," AND data->>'pedestrian' = '0'", ""),
+            if_else(without_bike_filter, " AND data->>'bicycle' = '0'", ""),
+            if_else(without_truck_filter, " AND data->>'lorry' = '0'", ""),
+            if_else(without_rest_filter, paste0(" AND (((data->>'moped')::integer",
+                                       " + (data->>'omnibus')::integer",
+                                       " + (data->>'motorcycle')::integer",
+                                       " + (data->>'small_moped')::integer",
+                                       " + (data->>'other_road_user')::integer) = '0')"), ""),
             if_else(no_injuries_filter | slightly_filter | seriously_filter | dead_filter, "AND (", ""),
             if_else(no_injuries_filter, paste0(" (data->>'slightly_injured' = '0'",
                               " AND data->>'seriously_injured' = '0'",
@@ -207,6 +241,7 @@ server <- function(input, output, session) {
   
   update_map <- function(){
    renderLeaflet({
+     print(nrow(crashes_filtered()))
      if (nrow(crashes_filtered()) > 0) {
        leaflet(data = crashes_filtered()) %>%
         addProviderTiles(provider = "OpenStreetMap.DE", group = "schematisch") %>% 

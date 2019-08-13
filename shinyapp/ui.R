@@ -15,13 +15,26 @@ ui <- navbarPage("Münsteraner Verkehrsunfälle", id = "nav",
               column(3,
                      selectizeInput(
                        "vehicles",
-                       "Verkehrsmittel (UND-Verknüpfung)",
+                       "mit Verkehrsmittel (UND-Verknüpfung)",
                        choices = c("Fuß" = "ped", 
                                    "Rad" = "bike", 
                                    "PKW" = "car",
                                    "LKW" = "truck", 
                                    "sonstiges" = "rest"),
                        selected = c("bike", "car"),
+                       multiple = TRUE, 
+                       options = list(
+                         'plugins' = list('remove_button'))
+                       ),
+                     selectizeInput(
+                       "without_vehicles",
+                       "ohne Verkehrsmittel (UND-Verknüpfung)",
+                       choices = c("Fuß" = "ped", 
+                                   "Rad" = "bike", 
+                                   "PKW" = "car",
+                                   "LKW" = "truck", 
+                                   "sonstiges" = "rest"),
+                       selected = c(),
                        multiple = TRUE, 
                        options = list(
                          'plugins' = list('remove_button'))
@@ -154,6 +167,6 @@ ui <- navbarPage("Münsteraner Verkehrsunfälle", id = "nav",
             p("Lizenziert unter der ",
               a(href = "https://github.com/codeformuenster/crashes-shiny#rechtliches", target = "_blank", "GPLv3 (mehr Infos zur Lizenz hier).")),
             p("Ideen und Feedback willkommen!", a(href = "https://github.com/codeformuenster/crashes-shiny/issues", target = "_blank", "Zum Beispiel auf github"), " oder ", a(href = "mailto:muenster@codefor.de", target = "_blank", "per e-Mail.") )
-            ), # end tabPanel about
-   includeScript("fathom.js")
+            ) # end tabPanel about
+   #, includeScript("fathom.js")
    ) # end navbarpage
