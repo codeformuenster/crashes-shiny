@@ -9,7 +9,8 @@ options("spinner.type" = 4)
 ui <- navbarPage("Münsteraner Verkehrsunfälle", id = "nav",
                  
    tabPanel("Interaktive Karte",
-            withSpinner(leafletOutput("karte")),
+            p("Tipp: Zum Filtern der Daten unter die Karte scrollen (Achtung: Datensatz noch nicht ganz vollständig)"),
+            withSpinner(leafletOutput("karte", height = "600")),
             textOutput("number_of_crashes"),
             fluidRow(
               column(3,

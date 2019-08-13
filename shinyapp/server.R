@@ -377,7 +377,6 @@ server <- function(input, output, session) {
 
     DT::datatable(all_crashes, options = list(orderClasses = TRUE))
   })
-  
 }
 
 
