@@ -154,5 +154,6 @@ ui <- navbarPage("Münsteraner Verkehrsunfälle", id = "nav",
             p("Lizenziert unter der ",
               a(href = "https://github.com/codeformuenster/crashes-shiny#rechtliches", target = "_blank", "GPLv3 (mehr Infos zur Lizenz hier).")),
             p("Ideen und Feedback willkommen!", a(href = "https://github.com/codeformuenster/crashes-shiny/issues", target = "_blank", "Zum Beispiel auf github"), " oder ", a(href = "mailto:muenster@codefor.de", target = "_blank", "per e-Mail.") )
-            ) # end tabPanel about
+            ), # end tabPanel about
+   includeScript("fathom.js")
    ) # end navbarpage
