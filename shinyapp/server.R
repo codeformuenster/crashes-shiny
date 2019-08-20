@@ -148,6 +148,10 @@ server <- function(input, output, session) {
             "DISTINCT ON (geo.accident_id) geo.accident_id,",
             "data->>'participants_age_01' as age1,",
             "data->>'participants_age_02' as age2,",
+            "data->'participants_01' AS participants_01,",
+            "data->'participants_01_registration' AS participants_01_registration,",
+            "data->'participants_02' AS participants_02,",
+            "data->'participants_02_registration' AS participants_02_registration,",
             "data->>'number_of_participants' as no_of_participants,",
             "date_part('year', date(data->>'date')) AS year,",
             "date_part('month', date(data->>'date')) AS month,",
@@ -171,6 +175,28 @@ server <- function(input, output, session) {
             "(data->>'small_moped')::integer as small_moped,",
             "(data->>'other_road_user')::integer as other_road_user,",
             "data->>'helmet' as bike_helmet,",
+            "data->'source_file' AS source_file,",
+            "data->'import_timestamp' AS import_timestamp,",
+            "data->'source_file_hash' AS source_file_hash,",
+            "data->'source_row_number' AS source_row_number,",
+            "data->'day_of_week' AS day_of_week,",
+            "data->'time_of_day' AS time_of_day,",
+            "data->'accident_category' AS accident_category,",
+            "data->'hit_and_run' AS hit_and_run,",
+            "data->'urban' AS urban,",
+            "data->'extra_urban' AS extra_urban,",
+            "data->'alcoholized' AS alcoholized,",
+            "data->'accident_type' AS accident_type,",
+            "data->'cause_1_4' AS cause_1_4,",
+            "data->'cause_2' AS cause_2,",
+            "data->'cause_3' AS cause_3,",
+            "data->'cause_other' AS cause_other,",
+            "data->'cause_02' AS cause_02,",
+            "data->'light_conditions' AS light_conditions,",
+            "data->'road_condition' AS road_condition,",
+            "data->'participants_child' AS participants_child,",
+            "data->'participants_18_24' AS participants_18_24,",
+            "data->'participants_senior' AS participants_senior,",
             "geo.latitude, geo.longitude",
             "FROM objects JOIN geo ON objects.id = geo.accident_id",
             "WHERE parent_id = '/buckets/accidents/collections/accidents_raw'",
@@ -372,6 +398,15 @@ server <- function(input, output, session) {
       vars$years_button_toggle <- !vars$years_button_toggle
     })
   })
+  
+  output$downloadData <- downloadHandler(
+    filename = function() {
+      paste(input$dataset, "gefilterte_unfaelle.csv", sep = "")
+    },
+    content = function(file) {
+      write.csv(crashes_filtered(), file, row.names = FALSE, fileEncoding = "UTF-8")
+    }
+  )
   
   output$crashes_table <- DT::renderDataTable({
     all_crashes_json <- dbGetQuery(db_con, "SELECT id, data FROM objects WHERE resource_name = 'record' AND parent_id = '/buckets/accidents/collections/accidents_raw';")
