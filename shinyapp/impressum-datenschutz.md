@@ -28,11 +28,11 @@ Unser Angebot enthält Links zu externen Webseiten Dritter, auf deren Inhalte wi
 
 ### Urheberrecht
 
-Die durch die Seitenbetreiber erstellten Inhalte und Werke auf diesen Seiten unterliegen dem deutschen Urheberrecht. Sie sind mit einer Creative Commons Lizenz urheberrechtlich geschützt. Sofern nicht anders angegeben, stehen die Inhalte dieser Seite unter der Creative Commons Namensnennung 3.0 DE Lizenz. Soweit die Inhalte auf dieser Seite nicht vom Betreiber erstellt wurden, werden die Urheberrechte Dritter beachtet. Insbesondere werden Inhalte Dritter als solche gekennzeichnet. Sollten Sie trotzdem auf eine Urheberrechtsverletzung aufmerksam werden, bitten wir um einen entsprechenden Hinweis. Bei Bekanntwerden von Rechtsverletzungen werden wir derartige Inhalte umgehend entfernen.
+Die durch die Seitenbetreiber erstellten Inhalte und Werke auf diesen Seiten unterliegen dem deutschen Urheberrecht. Der Quelltext dieser Anwendung ist unter der GPLv3 lizenziert ([mehr Infos zur Lizenz hier](https://github.com/codeformuenster/crashes-shiny#rechtliches)). Soweit die Inhalte auf dieser Seite nicht vom Betreiber erstellt wurden, werden die Urheberrechte Dritter beachtet. Insbesondere werden Inhalte Dritter als solche gekennzeichnet. Sollten Sie trotzdem auf eine Urheberrechtsverletzung aufmerksam werden, bitten wir um einen entsprechenden Hinweis. Bei Bekanntwerden von Rechtsverletzungen werden wir derartige Inhalte umgehend entfernen.
 
 ## Datenschutzerklärung
 
-Die Open Knowledge Foundation Deutschland e.V., Singerstr. 109, 10179 Berlin, Deutschland (nachfolgend als „Open Knowledge Foundation“ oder „wir“ bezeichnet) betreibt die im Internet unter https://crashes.codeformuenster.org und den jeweils dazu gehörenden Unterverzeichnissen abrufbare Internetseite (nachfolgend „crashes“ oder die „Website“).
+Die Open Knowledge Foundation Deutschland e.V., Singerstr. 109, 10179 Berlin, Deutschland (nachfolgend als „Open Knowledge Foundation“ oder „wir“ bezeichnet) betreibt die im Internet unter https://crashes.codeformuenster.org und den jeweils dazu gehörenden Unterverzeichnissen abrufbare Internetseite (nachfolgend die „Website“).
 
 Die Open Knowledge Foundation möchte Ihnen mit dieser Datenschutzerklärung erläutern, welche Daten in welcher Form verarbeitet werden, wenn Sie unsere Website besuchen. Hiermit kommen wir zugleich unserer Informationspflicht gem. Art. 13 Datenschutz-Grundverordnung (DS-GVO) Ihnen gegenüber nach.
 
