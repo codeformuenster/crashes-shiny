@@ -265,7 +265,7 @@ server <- function(input, output, session) {
     global_vars$filter_changed <- TRUE
   })
   
-  output$button <- renderUI({
+  output$refresh_button <- renderUI({
     if (global_vars$filter_changed) {
         actionButton(inputId = "update_button", "Aktualisieren", icon = icon("refresh"),
                      style = "color: white; background-color: #86D956;")
@@ -273,6 +273,26 @@ server <- function(input, output, session) {
         actionButton(inputId = "update_button", "Aktualisieren", icon = icon("refresh"),
                      style = "color: black; background-color: #FFFFFF")
       }
+  })
+  
+  output$heatmap_size_slider <- renderUI({
+    if (input$heatmap_toggle) {
+      sliderInput(
+         "heatmap_size",
+         "Heatmap-Größe (in m)",
+         min = 0, max = 1000,
+         value = 300)
+    }
+  })
+  
+  output$heatmap_intensity_sider <- renderUI({
+    if (input$heatmap_toggle) {
+      sliderInput(
+        "heatmap_intensity",
+        "Heatmap-Intensität",
+        min = 0, max = 1,
+        value = 0.2)
+    }
   })
 
   output$number_of_crashes <- renderText({

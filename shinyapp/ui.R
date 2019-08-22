@@ -158,7 +158,7 @@ ui <- navbarPage("Münsteraner Verkehrsunfälle", id = "nav",
             ),
      column(3,
             textOutput("number_of_crashes"),
-            uiOutput("button"), # refresh button, see renderUI in server.R
+            uiOutput("refresh_button"), # refresh button, see renderUI in server.R
             actionButton("reset_map_button", 
                          "Karte zurücksetzen", 
                          icon = icon("search-minus")),
@@ -168,16 +168,8 @@ ui <- navbarPage("Münsteraner Verkehrsunfälle", id = "nav",
             checkboxInput("heatmap_toggle",
                           list("Heatmap", icon("binoculars")),
                           value = TRUE),
-            sliderInput(
-               "heatmap_size",
-               "Heatmap-Größe (in m)",
-               min = 0, max = 1000,
-               value = 300),
-            sliderInput(
-               "heatmap_intensity",
-               "Heatmap-Intensität",
-               min = 0, max = 1,
-               value = 0.2)
+            uiOutput("heatmap_size_slider"),
+            uiOutput("heatmap_intensity_sider")
              ) # end column
      ) # end fluidRow (filter)
             
