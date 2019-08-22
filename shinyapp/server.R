@@ -342,7 +342,7 @@ server <- function(input, output, session) {
              lat = ~latitude,
              clusterOptions = markerClusterOptions(),
              popup = paste0(names(weekdays_string_to_numbers[crashes_filtered()$german_weekday + 1]),
-                           ", ", crashes_filtered()$day,
+                           ", ", crashes_filtered()$day_of_month,
                            ".", crashes_filtered()$month,
                            ".", crashes_filtered()$year,
                            ", ", crashes_filtered()$hour,
@@ -409,17 +409,7 @@ server <- function(input, output, session) {
   )
   
   output$crashes_table <- DT::renderDataTable({
-    all_crashes_json <- dbGetQuery(db_con, "SELECT id, data FROM objects WHERE resource_name = 'record' AND parent_id = '/buckets/accidents/collections/accidents_raw';")
-    
-    json_obj <- paste0("[", all_crashes_json$data, "]", collapse = "")
-    json_obj <- stri_replace_all_fixed(json_obj, "][", ",")
-
-    all_crashes <- cbind(id = all_crashes_json$id, fromJSON(json_obj))
-    
-    # all_crashes <- cbind("id" = all_crashes_json$id, 
-    #                      as.data.frame(t(sapply(all_crashes_json$data, fromJSON, USE.NAMES = FALSE, simplify = "matrix"))))
-
-    DT::datatable(all_crashes, options = list(orderClasses = TRUE))
+    DT::datatable(crashes_filtered())
   })
 }
 
