@@ -153,16 +153,19 @@ ui <- navbarPage("Münsteraner Verkehrsunfälle", id = "nav",
               ),
             actionButton("years_button", 
                          "Alle Jahre", 
-                         icon = icon("calendar-plus"))
+                         icon = icon("calendar-plus")),
+            downloadButton("downloadData", "gefilterte Daten herunterladen")
             ),
      column(3,
             textOutput("number_of_crashes"),
             actionButton("update_button", 
                          "Aktualisieren", 
                          icon = icon("refresh")),
-            downloadButton("downloadData", "gefilterte Daten herunterladen"),
+            actionButton("reset_map_button", 
+                         "Karte zurücksetzen", 
+                         icon = icon("search-minus")),
             checkboxInput("heatmap_toggle",
-                           list("Heatmap", icon("binoculars")),
+                          list("Heatmap", icon("binoculars")),
                           value = TRUE),
             checkboxInput("markers_toggle",
                           list("Marker", icon("map-marker-alt")),
@@ -172,9 +175,11 @@ ui <- navbarPage("Münsteraner Verkehrsunfälle", id = "nav",
                "Heatmap-Größe (in m)",
                min = 0, max = 1000,
                value = 300),
-             actionButton("reset_map_button", 
-                         "Karte zurücksetzen", 
-                         icon = icon("search-minus"))
+            sliderInput(
+               "heatmap_intensity",
+               "Heatmap-Intensität",
+               min = 0, max = 1,
+               value = 0.2)
              ) # end column
      ) # end fluidRow (filter)
             

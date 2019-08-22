@@ -318,7 +318,7 @@ server <- function(input, output, session) {
           clearGroup("Heatmap") %>% 
            addWebGLHeatmap(lng = ~longitude,
                           lat = ~latitude,
-                          intensity = 0.5,
+                          intensity = input$heatmap_intensity,
                           size = input$heatmap_size, units = "m",
                           opacity = 0.75,
                           group = "Heatmap") %>%
