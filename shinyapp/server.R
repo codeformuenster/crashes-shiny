@@ -3,6 +3,8 @@ library(shiny)
 # Define server logic required to draw the map
 server <- function(input, output, session) {
   
+  global_vars = reactiveValues(years_button_toggle = TRUE, filter_changed = FALSE)
+
   # open connection to database
   db_con <- dbConnect(RPostgres::Postgres(), dbname = "postgres",
                     host = Sys.getenv("POSTGRES_HOST"), port = 5432,
@@ -247,8 +249,30 @@ server <- function(input, output, session) {
     filtered <- dbGetQuery(db_con, sql_string)
     
     print(head(filtered))
-
+    
+    # reset color of refresh button
+    global_vars$filter_changed <- FALSE
+    
     return(filtered)
+  })
+
+  # observe all filters and toggle the global variable to color the refresh button
+  observeEvent(c(input$vehicles, input$without_vehicles, input$injured,
+                 input$age_filter, input$bike_helmet, input$single_participant,
+                 input$hour_filter, input$weekdays, input$months, input$years,
+                 input$years_button, input$heatmap_toggle, input$markers_toggle,
+                 input$heatmap_size, input$heatmap_intensity), {
+    global_vars$filter_changed <- TRUE
+  })
+  
+  output$button <- renderUI({
+    if (global_vars$filter_changed) {
+        actionButton(inputId = "update_button", "Aktualisieren", icon = icon("refresh"),
+                     style = "color: white; background-color: #86D956;")
+      } else {
+        actionButton(inputId = "update_button", "Aktualisieren", icon = icon("refresh"),
+                     style = "color: black; background-color: #FFFFFF")
+      }
   })
 
   output$number_of_crashes <- renderText({
@@ -274,7 +298,8 @@ server <- function(input, output, session) {
   })
   
   update_map <- function(){
-   renderLeaflet({
+    
+    renderLeaflet({
      print(nrow(crashes_filtered()))
      if (nrow(crashes_filtered()) > 0) {
        leaflet(data = crashes_filtered()) %>%
@@ -290,8 +315,8 @@ server <- function(input, output, session) {
       leaflet() %>%
          addPopups(lat = 51.96, lng = 7.62,
                    popup = "Es gibt keine Daten, die den aktuellen Filtereinstellungen entsprechen.", 
-                   options = popupOptions(closeButton = FALSE))
-    }
+                    options = popupOptions(closeButton = FALSE))
+     }
     })
   }
   
@@ -375,11 +400,9 @@ server <- function(input, output, session) {
     }
   })
 
-  vars = reactiveValues(years_button_toggle = TRUE)
-
   observeEvent(input$years_button, {
     
-    if (vars$years_button_toggle) {
+    if (global_vars$years_button_toggle) {
       updateSelectizeInput(session, "years",
                          selected = c("2007", "2008", "2009", "2010",
                                       "2011", "2012", "2013", "2014",
@@ -394,8 +417,9 @@ server <- function(input, output, session) {
                          label = "Alle Jahre",
                          icon = icon("calendar-plus"))
     }
+    
     isolate({
-      vars$years_button_toggle <- !vars$years_button_toggle
+      global_vars$years_button_toggle <- !global_vars$years_button_toggle
     })
   })
   
