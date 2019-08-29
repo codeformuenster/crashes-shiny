@@ -211,13 +211,19 @@ server <- function(input, output, session) {
             if_else(input$bike_helmet, "AND (data->>'helmet') like '%j%'", ""),
             if_else(input$single_participant, "AND (data->>'number_of_participants')::integer = '1'", ""),
             # age participant1
-            "AND ( ((data->>'participants_age_01')::integer IS NULL) OR ",
+            " AND ( ((data->>'participants_age_01')::integer IS NULL) OR ",
             "((data->>'participants_age_01')::integer >= ", input$age_filter[1],
-            "AND (data->>'participants_age_01')::integer <= ", input$age_filter[2], ")",
+            " AND (data->>'participants_age_01')::integer <= ", input$age_filter[2], ")",
             # age participant 2
-            "OR ( ((data->>'participants_age_02')::integer IS NULL) OR ",
+            ifelse(
+              (is.element("2015", input$years) |
+               is.element("2016", input$years) |
+               is.element("2017", input$years) |
+               is.element("2018", input$years)),
+              paste0("OR ( ((data->>'participants_age_02')::integer IS NULL) OR ",
             "(data->>'participants_age_02')::integer >= ", input$age_filter[1],
-            "AND (data->>'participants_age_02')::integer <= ", input$age_filter[2], "))",
+            " AND (data->>'participants_age_02')::integer <= ", input$age_filter[2], "))")
+            , ")"),
             if_else(car_filter, " AND data->>'car' > '0'", ""),
             if_else(ped_filter," AND data->>'pedestrian' > '0'", ""),
             if_else(bike_filter, " AND data->>'bicycle' > '0'", ""),

@@ -81,8 +81,8 @@ ui <- navbarPage("Münsteraner Verkehrsunfälle", id = "nav",
               ),
             sliderInput(
               "age_filter",
-              "Alter:",
-              min = 0,
+              "Alter (ab 2010):",
+              min = 1,
               max = 100,
               value = c(0, 100)
               )
