@@ -171,7 +171,19 @@ ui <- navbarPage("Münsteraner Verkehrsunfälle", id = "nav",
             uiOutput("heatmap_size_slider"),
             uiOutput("heatmap_intensity_sider")
              ) # end column
-     ) # end fluidRow (filter)
-            
-   , includeScript("fathom.js")
+     ), # end fluidRow (filter)
+   tags$script(HTML(paste0("(function(f, a, t, h, o, m){",
+                  "a[h]=a[h]||function(){",
+                  "(a[h].q=a[h].q||[]).push(arguments)",
+                  "};",
+                  "o=f.createElement('script'),",
+                  "m=f.getElementsByTagName('script')[0];",
+                  "o.async=1; o.src=t; o.id='fathom-script';",
+                  "m.parentNode.insertBefore(o,m)",
+               "})(document, window, '//fathom.codeformuenster.org/tracker.js', 'fathom');",
+               "fathom('set', 'siteId', '", Sys.getenv("FATHOM_SITEID"), "');",
+               "fathom('trackPageview');"
+               )
+        )
+   )
 ) # end navbarpage
