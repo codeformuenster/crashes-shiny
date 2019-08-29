@@ -210,9 +210,13 @@ server <- function(input, output, session) {
             "AND date_part('hour', TO_TIMESTAMP(data->>'time_of_day', 'HH24:MI:SS')::TIME) < ", input$hour_filter[2],
             if_else(input$bike_helmet, "AND (data->>'helmet') like '%j%'", ""),
             if_else(input$single_participant, "AND (data->>'number_of_participants')::integer = '1'", ""),
-            "AND (((data->>'participants_age_01')::integer >= ", input$age_filter[1],
+            # age participant1
+            "AND ( ((data->>'participants_age_01')::integer IS NULL) OR ",
+            "((data->>'participants_age_01')::integer >= ", input$age_filter[1],
             "AND (data->>'participants_age_01')::integer <= ", input$age_filter[2], ")",
-            "OR ((data->>'participants_age_02')::integer >= ", input$age_filter[1],
+            # age participant 2
+            "OR ( ((data->>'participants_age_02')::integer IS NULL) OR ",
+            "(data->>'participants_age_02')::integer >= ", input$age_filter[1],
             "AND (data->>'participants_age_02')::integer <= ", input$age_filter[2], "))",
             if_else(car_filter, " AND data->>'car' > '0'", ""),
             if_else(ped_filter," AND data->>'pedestrian' > '0'", ""),
