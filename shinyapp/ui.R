@@ -157,7 +157,7 @@ ui <- navbarPage("Münsteraner Verkehrsunfälle", id = "nav",
             downloadButton("downloadData", "gefilterte Daten herunterladen")
             ),
      column(3,
-            textOutput("number_of_crashes"),
+            htmlOutput("number_of_crashes"),
             uiOutput("refresh_button"), # refresh button, see renderUI in server.R
             actionButton("reset_map_button", 
                          "Karte zurücksetzen", 

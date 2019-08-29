@@ -147,7 +147,7 @@ server <- function(input, output, session) {
             "FROM objects WHERE parent_id = '/buckets/accidents/collections/geometries'",
             "AND resource_name = 'record')",
             "SELECT",
-            "DISTINCT ON (geo.accident_id) geo.accident_id,",
+            "DISTINCT ON (id) id,",
             "data->>'participants_age_01' as age1,",
             "data->>'participants_age_02' as age2,",
             "data->'participants_01' AS participants_01,",
@@ -200,7 +200,7 @@ server <- function(input, output, session) {
             "data->'participants_18_24' AS participants_18_24,",
             "data->'participants_senior' AS participants_senior,",
             "geo.latitude, geo.longitude",
-            "FROM objects JOIN geo ON objects.id = geo.accident_id",
+            "FROM objects LEFT JOIN geo ON objects.id = geo.accident_id",
             "WHERE parent_id = '/buckets/accidents/collections/accidents_raw'",
             "AND resource_name = 'record'",
             "AND date_part('year', date(data->>'date')) in ", year_filter,
@@ -248,14 +248,14 @@ server <- function(input, output, session) {
     
     filtered <- dbGetQuery(db_con, sql_string)
     
-    print(head(filtered))
+    # print(head(filtered))
     
     # reset color of refresh button
     global_vars$filter_changed <- FALSE
     
     return(filtered)
   })
-
+  
   # observe all filters and toggle the global variable to color the refresh button
   observeEvent(c(input$vehicles, input$without_vehicles, input$injured,
                  input$age_filter, input$bike_helmet, input$single_participant,
@@ -296,7 +296,16 @@ server <- function(input, output, session) {
   })
 
   output$number_of_crashes <- renderText({
-    paste0("Anzahl Unfälle: ", nrow(crashes_filtered()))
+    crashes_filtered_without_location <-
+      crashes_filtered()[!complete.cases(crashes_filtered()[, c("latitude", "longitude")]), ]
+    paste0("Anzahl Unfälle: ", nrow(crashes_filtered()), ifelse(
+      nrow(crashes_filtered_without_location) > 0,
+      paste0(", davon ", nrow(crashes_filtered_without_location),
+             " noch ohne Geolokalisation (d.h. nicht auf Karte sichtbar; ",
+             "[bald verfügbar: mithelfen und hinzufügen!]",
+             # a(href = "https://ms-verkehrsunfaelle-beta.netlify.com/", target = "_blank", "mithelfen und hinzufügen!"),
+             ")"),
+      ""))
   })
 
   # LEAFLET -----------------------------------------------------------------
@@ -320,7 +329,6 @@ server <- function(input, output, session) {
   update_map <- function(){
     
     renderLeaflet({
-     print(nrow(crashes_filtered()))
      if (nrow(crashes_filtered()) > 0) {
        leaflet(data = crashes_filtered()) %>%
         addProviderTiles(provider = "OpenStreetMap.DE", group = "schematisch") %>% 
@@ -356,8 +364,10 @@ server <- function(input, output, session) {
   
   # observe heatmap, ignoreNULL is to have this executed at the start
   observeEvent(input$update_button, ignoreNULL = FALSE, {
-    proxy <- leafletProxy("karte", data = crashes_filtered())
-    if (length(crashes_filtered()) > 0) {
+    crashes_filtered_with_location <-
+      crashes_filtered()[complete.cases(crashes_filtered()[, c("latitude", "longitude")]), ]
+    proxy <- leafletProxy("karte", data = crashes_filtered_with_location)
+    if (length(crashes_filtered_with_location) > 0) {
       if (input$heatmap_toggle) {
         proxy %>% 
           clearGroup("Heatmap") %>% 
@@ -378,38 +388,43 @@ server <- function(input, output, session) {
   
   # marker observe, ignoreNULL is to have this executed at the start
   observeEvent(input$update_button, ignoreNULL = FALSE, {
-    proxy <- leafletProxy("karte", data = crashes_filtered())
-    if (length(crashes_filtered()) > 0) {
+    crashes_filtered_with_location <-
+      crashes_filtered()[complete.cases(crashes_filtered()[, c("latitude", "longitude")]), ]
+    proxy <- leafletProxy("karte", data = crashes_filtered_with_location)
+    if (length(crashes_filtered_with_location) > 0) {
       if (input$markers_toggle) {
         proxy %>% 
           clearGroup("Markers") %>% 
           addMarkers(lng = ~longitude,
-             lat = ~latitude,
-             clusterOptions = markerClusterOptions(),
-             popup = paste0(names(weekdays_string_to_numbers[crashes_filtered()$german_weekday + 1]),
-                           ", ", crashes_filtered()$day_of_month,
-                           ".", crashes_filtered()$month,
-                           ".", crashes_filtered()$year,
-                           ", ", crashes_filtered()$hour,
-                           ":", sprintf("%02d", crashes_filtered()$minute), " Uhr",
-                           ", ", crashes_filtered()$street,
-                           " ", crashes_filtered()$street_additional,
-                           ", Alter: ", crashes_filtered()$age1, " & ", crashes_filtered()$age2, 
-                           ",<br>Tote: ", crashes_filtered()$deaths,
-                           ", Schwerverletzte: ", crashes_filtered()$sv,
-                           ", Leichtverletzte: ", crashes_filtered()$lv,
-                           ",<br>PKW: ", crashes_filtered()$car,
-                           ", LKW: ", crashes_filtered()$lorry,
-                           ", Bus: ", crashes_filtered()$omnibus,
-                           ", Fußgänger: ", crashes_filtered()$pedestrian,
-                           ", Fahrräder: ", crashes_filtered()$bicycle,
+                     lat = ~latitude,
+                     clusterOptions = markerClusterOptions(),
+                     popup = paste0(names(weekdays_string_to_numbers[crashes_filtered_with_location$german_weekday + 1]),
+                           ", ", crashes_filtered_with_location$day_of_month,
+                           ".", crashes_filtered_with_location$month,
+                           ".", crashes_filtered_with_location$year,
+                           ", ", crashes_filtered_with_location$hour,
+                           ":", sprintf("%02d", crashes_filtered_with_location$minute), " Uhr",
+                           ", ", crashes_filtered_with_location$street,
+                           " ", crashes_filtered_with_location$street_additional,
+                           ", Alter: ", crashes_filtered_with_location$age1, " & ", crashes_filtered_with_location$age2,
+                           ",<br>Tote: ", crashes_filtered_with_location$deaths,
+                           ", Schwerverletzte: ", crashes_filtered_with_location$sv,
+                           ", Leichtverletzte: ", crashes_filtered_with_location$lv,
+                           ",<br>PKW: ", crashes_filtered_with_location$car,
+                           ", LKW: ", crashes_filtered_with_location$lorry,
+                           ", Bus: ", crashes_filtered_with_location$omnibus,
+                           ", Fußgänger: ", crashes_filtered_with_location$pedestrian,
+                           ", Fahrräder: ", crashes_filtered_with_location$bicycle,
                            ", sonstige Verkehrsmittel: ", 
-                             crashes_filtered()$moped +
-                             crashes_filtered()$omnibus +
-                             crashes_filtered()$motorcycle +
-                             crashes_filtered()$small_moped +
-                             crashes_filtered()$other_road_user,
-                           ", id: ", crashes_filtered()$accident_id),
+                             crashes_filtered_with_location$moped +
+                             crashes_filtered_with_location$omnibus +
+                             crashes_filtered_with_location$motorcycle +
+                             crashes_filtered_with_location$small_moped +
+                             crashes_filtered_with_location$other_road_user,
+                           ", id: ", crashes_filtered_with_location$id,
+                           "<br>(Ort falsch? Hier korrigieren! [Funktion bald verfügbar]",
+                           # a(href = "https://ms-verkehrsunfaelle-beta.netlify.com/", target = "_blank", "Hier korrigieren!"),
+                           ")"),
              group = "Markers") %>%
           showGroup("Markers") %>% 
           setView(lat = center()[1], lng = center()[2], zoom = zoom())
