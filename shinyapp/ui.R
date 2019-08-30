@@ -90,7 +90,7 @@ ui <- navbarPage("Münsteraner Verkehrsunfälle", id = "nav",
      column(3,
             checkboxInput(
               "bike_helmet",
-              "Fahrradhelm?",
+              "Fahrradhelm? (ab 2015)",
               value = FALSE),
              checkboxInput(
               "single_participant",

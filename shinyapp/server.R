@@ -208,18 +208,24 @@ server <- function(input, output, session) {
             "AND date_part('dow', date(data->>'date')) in ", weekdays_filter,
             "AND date_part('hour', TO_TIMESTAMP(data->>'time_of_day', 'HH24:MI:SS')::TIME) >= ", input$hour_filter[1],
             "AND date_part('hour', TO_TIMESTAMP(data->>'time_of_day', 'HH24:MI:SS')::TIME) < ", input$hour_filter[2],
-            if_else(input$bike_helmet, "AND (data->>'helmet') like '%j%'", ""),
+            if_else(input$bike_helmet &
+                      # helmet only coded from 2015 onwards
+                      (is.element("2015", input$years) |
+                         is.element("2016", input$years) |
+                         is.element("2017", input$years) |
+                         is.element("2018", input$years)),
+                    "AND (data->>'helmet') like '%j%'", ""),
             if_else(input$single_participant, "AND (data->>'number_of_participants')::integer = '1'", ""),
             # age participant1
             " AND ( ((data->>'participants_age_01')::integer IS NULL) OR ",
             "((data->>'participants_age_01')::integer >= ", input$age_filter[1],
             " AND (data->>'participants_age_01')::integer <= ", input$age_filter[2], ")",
-            # age participant 2
-            ifelse(
+            # age participant 2, only coded from 2015 onwards
+            if_else(
               (is.element("2015", input$years) |
-               is.element("2016", input$years) |
-               is.element("2017", input$years) |
-               is.element("2018", input$years)),
+                 is.element("2016", input$years) |
+                 is.element("2017", input$years) |
+                 is.element("2018", input$years)),
               paste0("OR ( ((data->>'participants_age_02')::integer IS NULL) OR ",
             "(data->>'participants_age_02')::integer >= ", input$age_filter[1],
             " AND (data->>'participants_age_02')::integer <= ", input$age_filter[2], "))")
