@@ -3,7 +3,7 @@ library(shiny)
 # Define server logic required to draw the map
 server <- function(input, output, session) {
   
-  global_vars = reactiveValues(years_button_toggle = TRUE, filter_changed = FALSE)
+  global_vars = reactiveValues(years_button_toggle = TRUE, filter_changed = FALSE, update_visible_data = TRUE)
 
   # open connection to database
   db_con <- dbConnect(RPostgres::Postgres(), dbname = "postgres",
@@ -18,7 +18,7 @@ server <- function(input, output, session) {
     }
   })
   
-  crashes_filtered <- eventReactive(input$update_button, ignoreNULL = FALSE, {
+  crashes_filtered <- eventReactive(global_vars$update_visible_data, ignoreInit = TRUE, {
     
     # filter involved vehicles (with)
     
@@ -283,12 +283,20 @@ server <- function(input, output, session) {
   
   output$refresh_button <- renderUI({
     if (global_vars$filter_changed) {
-        actionButton(inputId = "update_button", "Aktualisieren", icon = icon("refresh"),
+      actionButton(inputId = "update_button", "Aktualisieren", icon = icon("refresh"),
                      style = "color: white; background-color: #86D956;")
-      } else {
-        actionButton(inputId = "update_button", "Aktualisieren", icon = icon("refresh"),
+    } else {
+      actionButton(inputId = "update_button", "Aktualisieren", icon = icon("refresh"),
                      style = "color: black; background-color: #FFFFFF")
-      }
+    }
+  })
+  
+  # this triggers an SQL query and the display of markers and / or the heatmap
+  # via global_vars$update_visible_data (but only once for every filter change)
+  observeEvent(input$update_button, ignoreNULL = FALSE, ignoreInit = TRUE, {
+    if(global_vars$filter_changed) {
+      global_vars$update_visible_data <- ! global_vars$update_visible_data
+    }
   })
   
   output$heatmap_size_slider <- renderUI({
@@ -378,8 +386,8 @@ server <- function(input, output, session) {
     }
   })
   
-  # observe heatmap, ignoreNULL is to have this executed at the start
-  observeEvent(input$update_button, ignoreNULL = FALSE, {
+  # observe heatmap
+  observeEvent(global_vars$update_visible_data, {
     crashes_filtered_with_location <-
       crashes_filtered()[complete.cases(crashes_filtered()[, c("latitude", "longitude")]), ]
     proxy <- leafletProxy("karte", data = crashes_filtered_with_location)
@@ -402,8 +410,8 @@ server <- function(input, output, session) {
     }
   })
   
-  # marker observe, ignoreNULL is to have this executed at the start
-  observeEvent(input$update_button, ignoreNULL = FALSE, {
+  # marker observe
+  observeEvent(global_vars$update_visible_data, {
     crashes_filtered_with_location <-
       crashes_filtered()[complete.cases(crashes_filtered()[, c("latitude", "longitude")]), ]
     proxy <- leafletProxy("karte", data = crashes_filtered_with_location)
