@@ -6,7 +6,9 @@ library(shinycssloaders)
 # define type of loading animation
 options("spinner.type" = 4)
 
-ui <- navbarPage("Münsteraner Verkehrsunfälle", id = "nav",
+ui <- navbarPage(
+   
+   "Münsteraner Verkehrsunfälle", id = "nav",
                  
    tabPanel("Interaktive Karte",
             p("Tipp: Zum Filtern der Daten unter die Karte scrollen. Datenquelle: Polizei Münster (Achtung: Datensatz noch nicht ganz vollständig)."),
@@ -22,11 +24,18 @@ ui <- navbarPage("Münsteraner Verkehrsunfälle", id = "nav",
             h4("Datenquelle"),
             p("Dank einer Anfrage bei der Polizei Münster über ",
               a(href = "https://fragdenstaat.de/anfrage/rohdaten-der-verkehrsunfallstatistik-munster/", target = "_blank", "Frag den Staat"),
-              "sind wir an Rohdaten der Verkehrsunfälle der Jahre 2007 bis 2014 gekommen. Die Daten ab 2015 haben wir dankenswerterweise über den ADFC bekommen. Nach mehreren Versuchen ist es uns gelungen, die zwischen den Jahren unterschiedlichen Spaltennamen und Formate in eine Datenbank zu laden um sie zu visualisieren und einfach zugänglich zu machen. Bedauerlicherweise werden die Orte der Verkehrsunfälle in einem schwer maschinenlesbaren Format aufgenommen (z.B.: 'Kappenberger Damm, Höhe Kriegerweg'). Wir haben es uns nun zur Aufgabe gemacht alle Unfälle durchzugehen und den korrekten Ort einzupflegen. Momentan sind weder alle Daten visualisiert noch kann für die Korrektheit der Daten garantiert werden."),
+              "sind wir an Rohdaten der Verkehrsunfälle der Jahre 2007 bis 2014 gekommen. ",
+              "Die Daten ab 2015 haben wir dankenswerterweise über den ADFC bekommen.",
+              "Nach mehreren Versuchen ist es uns gelungen, die zwischen den Jahren unterschiedlichen Spaltennamen",
+              "und Formate in eine Datenbank zu laden, um sie zu visualisieren und so einfach zugänglich zu machen.",
+              "Bedauerlicherweise werden die Orte der Verkehrsunfälle in einem schwer ",
+              "maschinenlesbaren Format aufgenommen (z.B.: 'Kappenberger Damm, Höhe Kriegerweg').",
+              "Wir haben es uns nun zur Aufgabe gemacht alle Unfälle durchzugehen und den korrekten Ort einzupflegen.",
+              HTML("<b>Momentan sind weder alle Daten visualisiert noch kann für die Korrektheit der Daten garantiert werden.</b>")),
             p("Die Rohdaten lassen sich ", a(href = "https://github.com/codeformuenster/open-data/tree/master/Unfallstatistiken", target = "_blank", "hier herunterladen.")),
             h4("Lizenz des Quelltexts"),
             p("Ein Projekt von ",
-              a(href = "https://codeformuenster.org", target = "_blank", "Code for Münster.")),
+              a(href = "https://codeformuenster.org", target = "_blank", img(src="cfm_logo.png", alt="Code for Münster."))),
             p("Lizenziert unter der ",
               a(href = "https://github.com/codeformuenster/crashes-shiny#rechtliches", target = "_blank", "GPLv3 (mehr Infos zur Lizenz hier).")),
             p("Ideen und Feedback willkommen!", a(href = "https://github.com/codeformuenster/crashes-shiny/issues", target = "_blank", "Zum Beispiel auf github"), " oder ", a(href = "mailto:muenster@codefor.de", target = "_blank", "per e-Mail.") )
@@ -172,6 +181,9 @@ ui <- navbarPage("Münsteraner Verkehrsunfälle", id = "nav",
             uiOutput("heatmap_intensity_sider")
              ) # end column
      ), # end fluidRow (filter)
+   
+   tags$head(tags$link(rel="shortcut icon", href="favicon.ico")),
+   
    tags$script(HTML(paste0("(function(f, a, t, h, o, m){",
                   "a[h]=a[h]||function(){",
                   "(a[h].q=a[h].q||[]).push(arguments)",
