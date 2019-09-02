@@ -422,7 +422,7 @@ server <- function(input, output, session) {
           addMarkers(lng = ~longitude,
                      lat = ~latitude,
                      clusterOptions = markerClusterOptions(),
-                     popup = paste0(names(weekdays_string_to_numbers[crashes_filtered_with_location$german_weekday + 1]),
+                     popup = paste0(names(weekdays_string_to_numbers[crashes_filtered_with_location$german_weekday]),
                            ", ", crashes_filtered_with_location$day_of_month,
                            ".", crashes_filtered_with_location$month,
                            ".", crashes_filtered_with_location$year,
