@@ -322,14 +322,21 @@ server <- function(input, output, session) {
   output$number_of_crashes <- renderText({
     crashes_filtered_without_location <-
       crashes_filtered()[!complete.cases(crashes_filtered()[, c("latitude", "longitude")]), ]
-    paste0("Anzahl Unfälle: ", nrow(crashes_filtered()), ifelse(
-      nrow(crashes_filtered_without_location) > 0,
-      paste0(", davon ", nrow(crashes_filtered_without_location),
-             " noch ohne Geolokalisation (d.h. nicht auf Karte sichtbar; ",
-             "[bald verfügbar: mithelfen und hinzufügen!]",
-             # a(href = "https://ms-verkehrsunfaelle-beta.netlify.com/", target = "_blank", "mithelfen und hinzufügen!"),
-             ")"),
-      ""))
+    
+    # text output:
+    if_else(nrow(crashes_filtered()) == 0,
+                 "Es gibt keine Daten, die den aktuellen Filtereinstellungen entsprechen.",
+                 paste0("Anzahl Unfälle: ", nrow(crashes_filtered()),
+                        if_else(nrow(crashes_filtered_without_location) > 0,
+                                paste0(", davon ", nrow(crashes_filtered_without_location),
+                                       " noch ohne Geolokalisation (d.h. nicht auf Karte sichtbar; ",
+                                       "[bald verfügbar: mithelfen und hinzufügen!]",
+                                       # a(href = "https://ms-verkehrsunfaelle-beta.netlify.com/",
+                                       # target = "_blank", "mithelfen und hinzufügen!"),
+                                       ")"),
+                                "")
+                        )
+            )
   })
 
   # LEAFLET -----------------------------------------------------------------
