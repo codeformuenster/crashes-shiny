@@ -182,7 +182,7 @@ ui <- navbarPage(
              ) # end column
      ), # end fluidRow (filter)
    
-   tags$head(tags$link(rel="shortcut icon", href="favicon.ico")),
+   tags$head(tags$link(rel = "shortcut icon", href = "favicon.ico")),
    
    tags$script(HTML(paste0("(function(f, a, t, h, o, m){",
                   "a[h]=a[h]||function(){",
