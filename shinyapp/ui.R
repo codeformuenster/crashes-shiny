@@ -35,7 +35,7 @@ ui <- navbarPage(
             p("Die Rohdaten lassen sich ", a(href = "https://github.com/codeformuenster/open-data/tree/master/Unfallstatistiken", target = "_blank", "hier herunterladen.")),
             h4("Lizenz des Quelltexts"),
             p("Ein Projekt von ",
-              a(href = "https://codeformuenster.org", target = "_blank", img(src="cfm_logo.png", alt="Code for Münster."))),
+              a(href = "https://codeformuenster.org", target = "_blank", img(src = "cfm_logo.png", alt = "Code for Münster."))),
             p("Lizenziert unter der ",
               a(href = "https://github.com/codeformuenster/crashes-shiny#rechtliches", target = "_blank", "GPLv3 (mehr Infos zur Lizenz hier).")),
             p("Ideen und Feedback willkommen!", a(href = "https://github.com/codeformuenster/crashes-shiny/issues", target = "_blank", "Zum Beispiel auf github"), " oder ", a(href = "mailto:muenster@codefor.de", target = "_blank", "per e-Mail.") )
