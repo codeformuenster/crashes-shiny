@@ -96,6 +96,17 @@ server <- function(input, output, session) {
       dead_filter <- TRUE
     }
     
+    type_filter <- "("
+    for (tidx in 1:length(input$type)) {
+      if (tidx != length(input$type)) {
+        type_filter <- paste0(type_filter, "'" , input$type[tidx], "',")
+      } else {
+        # no comma after last entry
+        type_filter <- paste0(type_filter, "'" , input$type[tidx], "'")
+      }
+    }
+    type_filter <- paste0(type_filter, ")")
+    
     year_filter <- "("
     for (yidx in 1:length(input$years)) {
     			if (yidx != length(input$years)) {
@@ -203,6 +214,7 @@ server <- function(input, output, session) {
             "FROM objects LEFT JOIN geo ON objects.id = geo.accident_id",
             "WHERE parent_id = '/buckets/accidents/collections/accidents_raw'",
             "AND resource_name = 'record'",
+            "AND SUBSTRING(data->>'accident_type', 1, 1) in ", type_filter,
             "AND date_part('year', date(data->>'date')) in ", year_filter,
             "AND date_part('month', date(data->>'date')) in ", month_filter,
             "AND date_part('dow', date(data->>'date')) in ", weekdays_filter,
@@ -260,7 +272,7 @@ server <- function(input, output, session) {
             if_else(dead_filter," data->>'deaths' > '0'", ""),
             if_else(no_injuries_filter | slightly_filter | seriously_filter | dead_filter, ")", ""))
     
-    print(sql_string)
+    # print(sql_string)
     
     filtered <- dbGetQuery(db_con, sql_string)
     
@@ -275,6 +287,7 @@ server <- function(input, output, session) {
   # observe all filters and toggle the global variable to color the refresh button
   observeEvent(c(input$vehicles, input$without_vehicles, input$injured,
                  input$age_filter, input$bike_helmet, input$single_participant,
+                 input$type,
                  input$hour_filter, input$weekdays, input$months, input$years,
                  input$years_button, input$heatmap_toggle, input$markers_toggle,
                  input$heatmap_size, input$heatmap_intensity), {
@@ -294,8 +307,8 @@ server <- function(input, output, session) {
   # this triggers an SQL query and the display of markers and / or the heatmap
   # via global_vars$update_visible_data (but only once for every filter change)
   observeEvent(input$update_button, ignoreNULL = FALSE, ignoreInit = TRUE, {
-    if(global_vars$filter_changed) {
-      global_vars$update_visible_data <- ! global_vars$update_visible_data
+    if (global_vars$filter_changed) {
+      global_vars$update_visible_data <- !global_vars$update_visible_data
     }
   })
   
@@ -452,7 +465,12 @@ server <- function(input, output, session) {
                              crashes_filtered_with_location$motorcycle +
                              crashes_filtered_with_location$small_moped +
                              crashes_filtered_with_location$other_road_user,
+                           ", ",
+                           a(href = "https://recht.nrw.de/lmi/owa/br_show_anlage?p_id=15549",
+                             target = "_blank", "Unfalltyp: "),
+                           crashes_filtered_with_location$accident_type,
                            ", id: ", crashes_filtered_with_location$id,
+                           ", ",
                            "<br>(Ort falsch? Hier korrigieren! [Funktion bald verfügbar]",
                            # a(href = "https://ms-verkehrsunfaelle-beta.netlify.com/", target = "_blank", "Hier korrigieren!"),
                            ")"),

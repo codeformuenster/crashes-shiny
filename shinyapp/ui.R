@@ -105,6 +105,14 @@ ui <- navbarPage(
               "single_participant",
               "Alleinunfall",
               value = FALSE),
+            selectizeInput(
+               "type",
+               "Unfalltyp:",
+               selected = c(1, 2, 3, 4, 5, 6, 7),
+               choices = type_table,
+               multiple = TRUE, options = list(
+                'plugins' = list('remove_button'))
+               ),
             sliderInput(
               "hour_filter",
               "Uhrzeit:",
