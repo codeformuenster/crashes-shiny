@@ -107,53 +107,24 @@ ui <- navbarPage(
               value = FALSE),
             selectizeInput(
                "type",
-               "Unfalltyp:",
+               HTML("Unfalltyp (<a href = 'https://recht.nrw.de/lmi/owa/br_show_anlage?p_id=15549'>Details</a>)"),
                selected = c(1, 2, 3, 4, 5, 6, 7),
                choices = type_table,
                multiple = TRUE, options = list(
                 'plugins' = list('remove_button'))
                ),
-            sliderInput(
-              "hour_filter",
-              "Uhrzeit:",
-              min = 0,
-              max = 24,
-              value = c(0, 24)
-              ),
-            selectizeInput(
-              "weekdays",
-              "Wochentage:",
-              selected = c(0, 1, 2, 3, 4, 5, 6),
-              choices = weekdays_string_to_numbers, 
-              multiple = TRUE, options = list(
-                'plugins' = list('remove_button'))
-              )
+            textInput(
+               "type_detail",
+               HTML("dreistelliger Unfalltyp (<a href = 'https://recht.nrw.de/lmi/owa/br_show_anlage?p_id=15549'>Details</a>; mit Komma trennen, ODER-Verknüpfung)"),
+               value = ""
+            )
             ),
      column(3,
-            selectizeInput(
-              "months",
-              "Monate:",
-              selected = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12),
-              choices = list("Januar" = 1, 
-                             "Februar" = 2, 
-                             "März" = 3, 
-                             "April" = 4, 
-                             "Mai" = 5,
-                             "Juni" = 6,
-                             "Juli" = 7,
-                             "August" = 8,
-                             "September" = 9,
-                             "Oktober" = 10, 
-                             "November" = 11,
-                             "Dezember" = 12), 
-              multiple = TRUE, options = list(
-                'plugins' = list('remove_button'))
-              ),
             selectizeInput(
               "years",
               "Jahre:",
               selected = c(2018),
-              choices = list("2007", 
+              choices = list("2007",
                              "2008",
                              "2009",
                              "2010",
@@ -171,14 +142,48 @@ ui <- navbarPage(
             actionButton("years_button", 
                          "Alle Jahre", 
                          icon = icon("calendar-plus")),
-            downloadButton("downloadData", "gefilterte Daten herunterladen")
-            ),
+            selectizeInput(
+              "months",
+              "Monate:",
+              selected = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12),
+              choices = list("Januar" = 1,
+                             "Februar" = 2,
+                             "März" = 3,
+                             "April" = 4,
+                             "Mai" = 5,
+                             "Juni" = 6,
+                             "Juli" = 7,
+                             "August" = 8,
+                             "September" = 9,
+                             "Oktober" = 10,
+                             "November" = 11,
+                             "Dezember" = 12),
+              multiple = TRUE, options = list(
+                 'plugins' = list('remove_button'))
+           ),
+           sliderInput(
+              "hour_filter",
+              "Uhrzeit:",
+              min = 0,
+              max = 24,
+              value = c(0, 24)
+           ),
+           selectizeInput(
+              "weekdays",
+              "Wochentage:",
+              selected = c(0, 1, 2, 3, 4, 5, 6),
+              choices = weekdays_string_to_numbers,
+              multiple = TRUE, options = list(
+                 'plugins' = list('remove_button'))
+           )
+     ),
      column(3,
             htmlOutput("number_of_crashes"),
             uiOutput("refresh_button"), # refresh button, see renderUI in server.R
             actionButton("reset_map_button", 
                          "Karte zurücksetzen", 
                          icon = icon("search-minus")),
+            downloadButton("downloadData", "gefilterte Daten herunterladen"),
             checkboxInput("markers_toggle",
                           list("Marker", icon("map-marker-alt")),
                           value = TRUE),
@@ -191,6 +196,8 @@ ui <- navbarPage(
      ), # end fluidRow (filter)
    
    tags$head(tags$link(rel = "shortcut icon", href = "favicon.ico")),
+   
+   # tags$script(src = "https://assets.digitalclimatestrike.net/widget.js", async = NA),
    
    tags$script(HTML(paste0("(function(f, a, t, h, o, m){",
                   "a[h]=a[h]||function(){",

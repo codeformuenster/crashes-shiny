@@ -107,6 +107,33 @@ server <- function(input, output, session) {
     }
     type_filter <- paste0(type_filter, ")")
     
+    type_detail_temp <- input$type_detail
+
+    # remove whitespace
+    type_detail_temp <- gsub(" ", "", type_detail_temp, fixed = TRUE)
+    # split at ','
+    type_detail_temp <- strsplit(type_detail_temp, split = ",")
+    # create a vector
+    type_detail_temp <- unlist(type_detail_temp)
+    # only consider three-letter codes
+    type_detail_temp <- type_detail_temp[nchar(type_detail_temp) == 3]
+    
+    if (length(type_detail_temp) > 0) {
+      # create a string
+      type_detail_filter <- "("
+      for (tidx in 1:length(type_detail_temp)) {
+        if (tidx != length(type_detail_temp)) {
+          type_detail_filter <- paste0(type_detail_filter, "'" , type_detail_temp[tidx], "',")
+        } else {
+          # no comma after last entry
+          type_detail_filter <- paste0(type_detail_filter, "'" , type_detail_temp[tidx], "'")
+        }
+      }
+      type_detail_filter <- paste0(type_detail_filter, ")")
+    } else {
+      type_detail_filter <- NA
+    }
+    
     year_filter <- "("
     for (yidx in 1:length(input$years)) {
     			if (yidx != length(input$years)) {
@@ -215,6 +242,7 @@ server <- function(input, output, session) {
             "WHERE parent_id = '/buckets/accidents/collections/accidents_raw'",
             "AND resource_name = 'record'",
             "AND SUBSTRING(data->>'accident_type', 1, 1) in ", type_filter,
+            if_else(!is.na(type_detail_filter), paste0("AND data->>'accident_type' in ", type_detail_filter), ""),
             "AND date_part('year', date(data->>'date')) in ", year_filter,
             "AND date_part('month', date(data->>'date')) in ", month_filter,
             "AND date_part('dow', date(data->>'date')) in ", weekdays_filter,
@@ -287,7 +315,7 @@ server <- function(input, output, session) {
   # observe all filters and toggle the global variable to color the refresh button
   observeEvent(c(input$vehicles, input$without_vehicles, input$injured,
                  input$age_filter, input$bike_helmet, input$single_participant,
-                 input$type,
+                 input$type, input$type_detail,
                  input$hour_filter, input$weekdays, input$months, input$years,
                  input$years_button, input$heatmap_toggle, input$markers_toggle,
                  input$heatmap_size, input$heatmap_intensity), {
@@ -467,7 +495,8 @@ server <- function(input, output, session) {
                              crashes_filtered_with_location$other_road_user,
                            ", ",
                            a(href = "https://recht.nrw.de/lmi/owa/br_show_anlage?p_id=15549",
-                             target = "_blank", "Unfalltyp: "),
+                             target = "_blank", "Unfalltyp"),
+                           ": ",
                            crashes_filtered_with_location$accident_type,
                            ", id: ", crashes_filtered_with_location$id,
                            ", ",
