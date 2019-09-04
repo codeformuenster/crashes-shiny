@@ -23,7 +23,9 @@ ui <- navbarPage(
    tabPanel("Über diese Seite",
             h4("Datenquelle"),
             p("Dank einer Anfrage bei der Polizei Münster über ",
-              a(href = "https://fragdenstaat.de/anfrage/rohdaten-der-verkehrsunfallstatistik-munster/", target = "_blank", "Frag den Staat"),
+              a(href = "https://fragdenstaat.de/anfrage/rohdaten-der-verkehrsunfallstatistik-munster/",
+                target = "_blank",
+                "Frag den Staat"),
               "sind wir an Rohdaten der Verkehrsunfälle der Jahre 2007 bis 2014 gekommen. ",
               "Die Daten ab 2015 haben wir dankenswerterweise über den ADFC bekommen.",
               "Nach mehreren Versuchen ist es uns gelungen, die zwischen den Jahren unterschiedlichen Spaltennamen",
@@ -32,13 +34,24 @@ ui <- navbarPage(
               "maschinenlesbaren Format aufgenommen (z.B.: 'Kappenberger Damm, Höhe Kriegerweg').",
               "Wir haben es uns nun zur Aufgabe gemacht alle Unfälle durchzugehen und den korrekten Ort einzupflegen.",
               HTML("<b>Momentan sind weder alle Daten visualisiert noch kann für die Korrektheit der Daten garantiert werden.</b>")),
-            p("Die Rohdaten lassen sich ", a(href = "https://github.com/codeformuenster/open-data/tree/master/Unfallstatistiken", target = "_blank", "hier herunterladen.")),
+            p("Die Rohdaten lassen sich ",
+              a(href = "https://github.com/codeformuenster/open-data/tree/master/Unfallstatistiken",
+                target = "_blank",
+                "hier herunterladen.")),
             h4("Lizenz des Quelltexts"),
             p("Ein Projekt von ",
               a(href = "https://codeformuenster.org", target = "_blank", img(src = "cfm_logo.png", alt = "Code for Münster."))),
             p("Lizenziert unter der ",
-              a(href = "https://github.com/codeformuenster/crashes-shiny#rechtliches", target = "_blank", "GPLv3 (mehr Infos zur Lizenz hier).")),
-            p("Ideen und Feedback willkommen!", a(href = "https://github.com/codeformuenster/crashes-shiny/issues", target = "_blank", "Zum Beispiel auf github"), " oder ", a(href = "mailto:muenster@codefor.de", target = "_blank", "per e-Mail.") )
+              a(href = "https://github.com/codeformuenster/crashes-shiny#rechtliches",
+                target = "_blank",
+                "GPLv3 (mehr Infos zur Lizenz hier).")),
+            p("Ideen und Feedback willkommen!",
+              a(href = "https://github.com/codeformuenster/crashes-shiny/issues", target = "_blank", "Zum Beispiel auf github"),q
+              " oder ", a(href = "mailto:muenster@codefor.de", target = "_blank", "per e-Mail.")),
+            # whitespace to move filters below (nicht schön, aber selten!)
+            br(), br(), br(), br(), br(), br(), br(), br(), br(), br(), br(), br(),
+            br(), br(), br(), br(), br(), br(), br(), br(), br(), br(), br(), br(),
+            br(), br(), br(), br(), br(), br(), br(), br(), br(), br(), br(), br()
             ), # end tabPanel about
    
    tabPanel("Impressum & Datenschutz",
