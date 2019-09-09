@@ -134,16 +134,20 @@ server <- function(input, output, session) {
       type_detail_filter <- NA
     }
     
-    year_filter <- "("
-    for (yidx in 1:length(input$years)) {
-    			if (yidx != length(input$years)) {
-    				year_filter <- paste0(year_filter, "'" , input$years[yidx], "',")
-    			} else {
-    				# no comma after last date
-    				year_filter <- paste0(year_filter, "'" , input$years[yidx], "'")
-    			}
-    	}
-    year_filter <- paste0(year_filter, ")")
+    if (length(input$years) > 0) {
+      year_filter <- "("
+      for (yidx in 1:length(input$years)) {
+      			if (yidx != length(input$years)) {
+      				year_filter <- paste0(year_filter, "'" , input$years[yidx], "',")
+      			} else {
+      				# no comma after last date
+      				year_filter <- paste0(year_filter, "'" , input$years[yidx], "'")
+      			}
+      	}
+      year_filter <- paste0(year_filter, ")")
+    } else {
+      year_filter <- ""
+    }
     
     if (length(input$months) > 0) {
       month_filter <- "("
@@ -243,7 +247,7 @@ server <- function(input, output, session) {
             "AND resource_name = 'record'",
             "AND SUBSTRING(data->>'accident_type', 1, 1) in ", type_filter,
             if_else(!is.na(type_detail_filter), paste0("AND data->>'accident_type' in ", type_detail_filter), ""),
-            "AND date_part('year', date(data->>'date')) in ", year_filter,
+            if_else(nchar(year_filter) > 0, paste0("AND date_part('year', date(data->>'date')) in ", year_filter), ""),
             "AND date_part('month', date(data->>'date')) in ", month_filter,
             "AND date_part('dow', date(data->>'date')) in ", weekdays_filter,
             "AND date_part('hour', TO_TIMESTAMP(data->>'time_of_day', 'HH24:MI:SS')::TIME) >= ", input$hour_filter[1],
