@@ -101,13 +101,11 @@ ui <- navbarPage(
                 'plugins' = list('remove_button')
                 )
               ),
-            sliderInput(
-              "age_filter",
-              "Alter (ab 2010):",
-              min = 1,
-              max = 100,
-              value = c(0, 100)
-              )
+            checkboxInput(
+               "age_toggle",
+               "nach Alter filtern (ab 2010)",
+               value = FALSE),
+            uiOutput("age_slider")
             ),
      column(3,
             checkboxInput(

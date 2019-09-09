@@ -202,9 +202,9 @@ server <- function(input, output, session) {
             "date(data->>'date') AS full_date,",
             "data->>'place' as street,",
             "data->>'place_near' as street_additional,",
-            "data->>'deaths' as deaths,",
-            "data->>'seriously_injured' as sv,",
-            "data->>'slightly_injured' as lv,",
+            "(data->>'deaths')::integer as deaths,",
+            "(data->>'seriously_injured')::integer as sv,",
+            "(data->>'slightly_injured')::integer as lv,",
             "(data->>'car')::integer as car,",
             "(data->>'lorry')::integer as lorry,",
             "(data->>'pedestrian')::integer as pedestrian,",
@@ -256,20 +256,24 @@ server <- function(input, output, session) {
                          is.element("2018", input$years)),
                     "AND (data->>'helmet') like '%j%'", ""),
             if_else(input$single_participant, "AND (data->>'number_of_participants')::integer = '1'", ""),
-            # age participant1
-            " AND ( ((data->>'participants_age_01')::integer IS NULL) OR ",
-            "((data->>'participants_age_01')::integer >= ", input$age_filter[1],
-            " AND (data->>'participants_age_01')::integer <= ", input$age_filter[2], ")",
-            # age participant 2, only coded from 2015 onwards
-            if_else(
-              (is.element("2015", input$years) |
-                 is.element("2016", input$years) |
-                 is.element("2017", input$years) |
-                 is.element("2018", input$years)),
-              paste0("OR ( ((data->>'participants_age_02')::integer IS NULL) OR ",
-            "(data->>'participants_age_02')::integer >= ", input$age_filter[1],
-            " AND (data->>'participants_age_02')::integer <= ", input$age_filter[2], "))")
-            , ")"),
+            if_else(input$age_toggle,
+              # filter age only if explicity asked for; data quality is rather bad
+              paste0(
+                # age participant1
+                " AND ( ",
+                "( (data->>'participants_age_01')::integer >= ", input$age_filter[1],
+                " AND (data->>'participants_age_01')::integer <= ", input$age_filter[2], ")",
+                # age participant 2, only coded from 2015 onwards
+                if_else(
+                  (is.element("2015", input$years) |
+                     is.element("2016", input$years) |
+                     is.element("2017", input$years) |
+                     is.element("2018", input$years)),
+                  paste0(" OR ",
+                         "( (data->>'participants_age_02')::integer >= ", input$age_filter[1],
+                         " AND (data->>'participants_age_02')::integer <= ", input$age_filter[2], ") )")
+                  , ")") # end if_else 2015-2018
+            ), ""), # end if_else age_toggle
             if_else(car_filter, " AND data->>'car' > '0'", ""),
             if_else(ped_filter," AND data->>'pedestrian' > '0'", ""),
             if_else(bike_filter, " AND data->>'bicycle' > '0'", ""),
@@ -300,7 +304,7 @@ server <- function(input, output, session) {
             if_else(dead_filter," data->>'deaths' > '0'", ""),
             if_else(no_injuries_filter | slightly_filter | seriously_filter | dead_filter, ")", ""))
     
-    # print(sql_string)
+    print(sql_string)
     
     filtered <- dbGetQuery(db_con, sql_string)
     
@@ -314,7 +318,7 @@ server <- function(input, output, session) {
   
   # observe all filters and toggle the global variable to color the refresh button
   observeEvent(c(input$vehicles, input$without_vehicles, input$injured,
-                 input$age_filter, input$bike_helmet, input$single_participant,
+                 input$age_toggle, input$age_filter, input$bike_helmet, input$single_participant,
                  input$type, input$type_detail,
                  input$hour_filter, input$weekdays, input$months, input$years,
                  input$years_button, input$heatmap_toggle, input$markers_toggle,
@@ -359,6 +363,18 @@ server <- function(input, output, session) {
         value = 0.2)
     }
   })
+  
+  output$age_slider <- renderUI({
+    if (input$age_toggle) {
+      sliderInput(
+        "age_filter",
+        "Alter (ab 2010):",
+        min = 1,
+        max = 100,
+        value = c(0, 100)
+      )
+    }
+  })
 
   output$number_of_crashes <- renderText({
     crashes_filtered_without_location <-
@@ -374,9 +390,12 @@ server <- function(input, output, session) {
                                        "[bald verfügbar: mithelfen und hinzufügen!]",
                                        # a(href = "https://ms-verkehrsunfaelle-beta.netlify.com/",
                                        # target = "_blank", "mithelfen und hinzufügen!"),
-                                       ")"),
-                                "")
-                        )
+                                       "),"),
+                                ""),
+                        "<br>",
+                        sum(crashes_filtered()$lv), " Leichtverletzte, ",
+                        sum(crashes_filtered()$sv), " Schwerverletzte, ",
+                        sum(crashes_filtered()$deaths), " Getötete")
             )
   })
 
