@@ -10,10 +10,12 @@
 \usepackage{graphicx}
 \usepackage{ccicons}
 
-\usepackage{savesym}
-\savesymbol{note} % beamer's \note now as \orignote
-\usepackage[natbibapa,nodoi]{apacite}
-\restoresymbol{apa}{note}% \note now again beamersnote, \apanote is APA \note command
+\usepackage{natbib}
+
+% \usepackage{savesym}
+% \savesymbol{note} % beamer's \note now as \orignote
+% \usepackage[natbibapa,nodoi]{apacite}
+% \restoresymbol{apa}{note}% \note now again beamersnote, \apanote is APA \note command
 
 \usepackage{tikz}
 \usetikzlibrary{calc,angles,decorations.pathmorphing,shapes}
@@ -26,11 +28,11 @@
 % \end{frame}
 % }
 %
-\setbeamercovered{transparent}
+% \setbeamercovered{transparent}
 
 \beamertemplatenavigationsymbolsempty
 
-\title{Sicherer Radfahren}
+\title[Sicherer Radfahren \hspace*{4cm} \insertframenumber/\inserttotalframenumber]{Sicherer Radfahren}
 \subtitle{Wie offene Unfalldaten helfen können}
 \author[Dr.\,Thomas Terstiege]{Dr.\,Thomas Terstiege}
 \institute[Code for Münster]{Code for Münster}
@@ -45,11 +47,10 @@
 		{\tiny Dieses Werk ist lizenziert unter einer "`Creative Commons Namensnennung - Weitergabe unter gleichen Bedingungen 4.0 International Lizenz"' (CC BY-SA 4.0).\par}
 }
 
-\section*{Einleitung}
+\section{Einleitung}
 
 \begin{frame}
-  \frametitle{}
-  \framesubtitle{}  
+%   \frametitle{\secname}
   
   \includegraphics[width=\textwidth]{img/WN-screenshot.png}
   
@@ -57,10 +58,10 @@
   {\scriptsize (Bildquelle: \url{https://www.wn.de/Startseite/Startseite-Schattenressort/3673899-Verkehrsunfallstatistik-2018-Ein-schlechter-Tag-fuer-Muenster})\par}
 \end{frame}
 
-\subsection{Entwicklung Unfallzahlen}
+\subsection{Entwicklung Unfälle mit Personenschaden}
 
 \begin{frame}
-  \frametitle{Entwicklung Unfallzahlen}
+  \frametitle{\subsecname}
 
   \centering
   
@@ -68,74 +69,91 @@
     \input{img/anzahl-unfaelle-pro-jahr}
     }
   
-    {\scriptsize (Grafik inspiriert durch: \citealt[Folie~4]{Brockmann2017})\par}
+    {\scriptsize (Grafik inspiriert durch: \cite[Folie~4]{Brockmann2017})\par}
 \end{frame}
 
 \begin{frame}
-  \frametitle{Entwicklung Unfallzahlen}
+  \frametitle{Entwicklung Unfallbeteiligte}
   \centering
   \includegraphics[width=0.925\textwidth]{img/anteil-unfaelle-beteiligte.png}
   \begin{tikzpicture}[overlay,remember picture]
-	  \node at ($(current page.center) + (1.3, 0.9)$) {\color{red}\footnotesize 2018 (Rad-PKW): 34\%};
-	  \node at ($(current page.center) + (1.3, -0.7)$) {\color{red}\footnotesize 2018 (PKW-PKW): 17\%};
-	  \node at ($(current page.center) + (1.3, -1.2)$) {\color{red}\footnotesize 2018 (Rad alleine): 11\%};
-    \node at ($(current page.center) + (1.3, -1.6)$) {\color{red}\footnotesize 2018 (Rad-Rad): 10\%};    
+	  \visible<2->{
+	    \node at ($(current page.center) + (1.0, 0.3)$) {\color{red}\footnotesize Rad-PKW, 2016--2018: 32\%};
+	  }
+	  \visible<2->{
+  	  \node at ($(current page.center) + (1.0, -0.7)$) {\color{red}\footnotesize PKW-PKW, 2016--2018: 20\%};
+  	}
+  	\visible<3->{
+  		\node at ($(current page.center) + (1.0, -1.1)$) {\color{red}\footnotesize Rad alleine, 2016--2018: 9\%};
+  	}
+  	\visible<3->{
+      \node at ($(current page.center) + (1.0, -1.6)$) {\color{red}\footnotesize Rad-Rad, 2016--2018: 9\%};
+    }
 	\end{tikzpicture}
   \vfill
   {\scriptsize (Bildquelle: \citealt[S.~11]{Baier2018})\par}
 \end{frame}
 
 \begin{frame}
-  \frametitle{Entwicklung Unfallzahlen}
+  \frametitle{Entwicklung UnfallverursacherInnen}
   \centering  
   \includegraphics[width=0.925\textwidth]{img/hauptverursacher.png}
     \begin{tikzpicture}[overlay,remember picture]
-	  \node at ($(current page.center) + (1.6, 0.85)$) {\color{red}\footnotesize 2018 (PKW): 56\%};
-	  \node at ($(current page.center) + (0.8, -0.9)$) {\color{red}\footnotesize 2018 (Rad, kein Alleinunfall): 22\%};
-	  \node at ($(current page.center) + (1.2, -1.95)$) {\color{red}\footnotesize 2018 (Rad Alleinunfall): 11\%}; 
+	  \visible<2->{
+      \node at ($(current page.center) + (1.5, 0.85)$) {\color{red}\footnotesize PKW, 2016--2018: 58\%};
+    }
+	  \visible<3->{
+  	  \node at ($(current page.center) + (0.5, -0.9)$) {\color{red}\footnotesize Rad, kein Alleinunfall, 2016--2018: 20\%};
+  	}
+	  \visible<4->{
+      \node at ($(current page.center) + (1.0, -1.95)$) {\color{red}\footnotesize Rad, Alleinunfall, 2016--2018: 9\%};
+    }
 	\end{tikzpicture}
   \vfill
-  {\scriptsize (Bildquelle: \citealt[S.~13]{Baier2018})\par}
-\end{frame}
-
-
-\begin{frame}
-  \frametitle{Zugänglichkeit Unfalldaten}
-  
-  \begin{itemize}
-    \item \cite{Polizei2019}: Verkehrsunfallstatistik 2018 der Polizei
-    \begin{itemize}
-      \item 12 Seiten
-      \item hoher Anteil an Rad-Unfällen wird genannt
-      \item nur implizit: PKW meist Unfallverursacher
-      \item viele Fragen bleiben offen
-    \end{itemize}
-    \item \cite{Baier2018}: umfangreiche, wichtige Studie
-    \item[aber:]
-    \begin{itemize}
-      \item mehr als 60 Seiten
-      \item Kurzfassung 20 Seiten
-      \pause
-      \item nicht interaktiv
-    \end{itemize}    
-  \end{itemize}
+  {\scriptsize (Bildquelle: \cite[S.~13]{Baier2018})\par}
 \end{frame}
 
 \section{Vorstellung "`Crashes"'}
 
-
+\subsection{Zugänglichkeit Unfalldaten}
 
 \begin{frame}
-  \frametitle{\url{https://crashes.codeformuenster.org}}
+  \frametitle{\subsecname}
   
   \begin{itemize}
-    \item Datengrundlage
-    \item Rohdaten polizeiliche Verkehrsunfallstatistiken 2007 - 2018
+    \item Verkehrsunfallstatistik der Polizei \cite{Polizei2019}
     \begin{itemize}
-      \item 
+      \item 12 Seiten, sehr selektiv
+      \item Fokus auf hohen Anteil Rad-Unfälle
+      \item nur implizit: PKW meist Unfallverursacher
+      \item viele Fragen bleiben offen
+    \end{itemize}
+    \pause
+    \item umfangreiche, wichtige Studie der Unfallforschung der Versicherer \cite{Baier2018}
+    \begin{itemize}
+      \item mehr als 60 Seiten, Kurzfassung 20 Seiten
+      \item sehr detailliert, schwer zugänglich für Laien
+    \end{itemize}
+      \pause
+      \item nicht georeferenziert
+      \item nicht interaktiv
+  \end{itemize}
+\end{frame}
+
+\subsection{https://crashes.codeformuenster.org}
+
+\begin{frame}
+  \frametitle{Datengrundlage}
+  
+  \begin{itemize}
+    \item Rohdaten aller Unfälle von der Polizei Münster 2007-2018
+    \begin{itemize}
+      \item 1 Excel-Tabelle pro Jahr
+      \item wechselnde Spaltenbezeichnungen über die Jahre
       \item manuelle Ortsangaben
     \end{itemize}
-    \item ein Großteil aufwändig geokodiert
+    \pause
+    \item Gerald hat Daten aufwändig geokodiert (Großteil), bereinigt und als Datenbank zugänglich gemacht
   \end{itemize}
   
 \end{frame}
@@ -143,7 +161,7 @@
 \begin{frame}
   \frametitle{\url{https://crashes.codeformuenster.org}}
   
-  \href{beispielpraesentation-crashes.mkv}{\url{https://crashes.codeformuenster.org}: Beispielvorführung}
+  \href{beispielpraesentation-crashes.mkv}{\texttt{https://crashes.codeformuenster.org}: Beispielvorführung}
   
 \end{frame}
 
@@ -162,6 +180,29 @@
   \includegraphics[width=0.9\textwidth]{img/unfalltyp-details.png}
   
   {\scriptsize (Bildquelle: \url{https://recht.nrw.de/lmi/owa/br_show_anlage?p_id=15549})\par}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Beispielanalyse Radunfälle}
+  \centering
+  \begin{columns}
+    \begin{column}{0.5\textwidth}
+      \begin{itemize}
+    \item {\color{blue} Hammer Str.: ca. 7.500 RadlerInnen/Tag (2018)}
+    \item {\color{blue} Wolbecker Str.: ca. 9.500 RadlerInnen/Tag (2018)}
+    \item Promenade: ca. 12.800 RadlerInnen/Tag (2018)
+    \item Radunfälle 2007--2018
+    \begin{itemize}
+      \item ohne PKW
+      \item ohne Abbiege- oder Einbiegen/Kreuzen-Unfälle
+    \end{itemize}
+    \item<2> Radwege zu eng?!
+  \end{itemize}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \includegraphics[width=\textwidth]{img/radwege-unfaelle.png}
+    \end{column}
+  \end{columns} 
 \end{frame}
 
 \section{Ausblick}
@@ -199,7 +240,8 @@
 % 	\vspace*{-0.4cm}
 %   \textbf{\footnotesize References}
 %   \renewcommand\bibliographytypesize{\fontsize{4}{4}\selectfont}
-	\bibliographystyle{apacite}	
+% 	\bibliographystyle{apacite}	
+  \bibliographystyle{plain}
 	\bibliography{references}
 \end{frame}
 
