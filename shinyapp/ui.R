@@ -208,7 +208,7 @@ ui <- navbarPage(
    
    tags$head(tags$link(rel = "shortcut icon", href = "favicon.ico")),
    
-   # tags$script(src = "https://assets.digitalclimatestrike.net/widget.js", async = NA),
+   tags$script(src = "https://assets.digitalclimatestrike.net/widget.js", async = NA),
    
    tags$script(HTML(paste0("(function(f, a, t, h, o, m){",
                   "a[h]=a[h]||function(){",
