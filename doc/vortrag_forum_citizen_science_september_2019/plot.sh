@@ -1,30 +1,19 @@
 #!/bin/sh
 rm gnuplot.command
 
-if [ -z "$1" ] 
-then
-	echo "Please specify .tex output file name.";
-	exit 1
-fi
-
-texFile=$(echo "${1%.*}")
+texFile=anzahl-unfaelle-pro-jahr
 
 mkdir -p img/
 
-echo "set yrange [0:1350]" >> gnuplot.command
-#echo set style boxplot nooutliers >> gnuplot.command
-#echo set offsets 0, 0.15 >> gnuplot.command
+echo "set yrange [0:1400]" >> gnuplot.command
 # echo set xrange [0.4:4.6] >> gnuplot.command
-echo set terminal cairolatex >> gnuplot.command
+echo "set grid" >> gnuplot.command
+echo "set key box height 0.75 width -3 at graph 0.85, 0.3" >> gnuplot.command
+echo "set terminal cairolatex" >> gnuplot.command
 #echo "set title '$dataFile'" >> gnuplot.command
-# echo set style fill transparent solid 0.4 >> gnuplot.command
-#echo set boxwidth 0.15 >> gnuplot.command
-# echo set xtic rotate by -30 >> gnuplot.command 
-echo "set ylabel 'Anzahl Unfälle mit Personenschaden'" >> gnuplot.command
+echo "set ylabel 'Anzahl Unfälle'" >> gnuplot.command
 echo "set output 'img/$texFile.tex'" >> gnuplot.command
-# plot only box-and-whiskers:
-# plot only medians and means:
-echo "plot 'anzahl-unfaelle-pro-jahr.data' using 1:2 with lines" >> gnuplot.command
+echo "plot 'anzahl-unfaelle-pro-jahr.data' using 1:2 with lines title 'Anzahl Unfälle mit Personenschaden' linetype 1 dashtype 1 linewidth 5, 'anzahl-unfaelle-pro-jahr.data' using 1:3 with lines title 'Ziel Ordnungspartnerschaft (-10\% pro Jahr)' linetype 2 dashtype 4 linewidth 5" >> gnuplot.command
 #echo pause -1 >> gnuplot.command
 
 gnuplot gnuplot.command 
