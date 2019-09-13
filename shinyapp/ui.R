@@ -70,7 +70,7 @@ ui <- navbarPage(
                           "Bus" = "bus",
                           "sonstiges" = "rest"),
               selected = c("bike", "car"),
-              multiple = TRUE, 
+              multiple = TRUE,
               options = list(
                 'plugins' = list('remove_button'))
               ),
@@ -84,9 +84,22 @@ ui <- navbarPage(
                           "Bus" = "bus",
                           "sonstiges" = "rest"),
               selected = c(),
-              multiple = TRUE, 
+              multiple = TRUE,
               options = list(
                 'plugins' = list('remove_button'))
+              ),
+            selectizeInput(
+                 "causer",
+                 "HauptverursacherIn (ODER-Verknüpfung)",
+                 choices = c("Fuß" = "ped",
+                             "Rad" = "bike",
+                             "PKW" = "car",
+                             "LKW/Lieferwagen" = "truck",
+                             "Bus" = "bus"),
+                 selected = c(),
+                 multiple = TRUE,
+                 options = list(
+                    'plugins' = list('remove_button'))
               ),
             selectizeInput(
               "injured",

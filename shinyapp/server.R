@@ -76,6 +76,30 @@ server <- function(input, output, session) {
       without_rest_filter <- TRUE
     }
     
+    # filter causer (Hauptverursacher)
+    
+    ped_causer_filter <- FALSE
+    bike_causer_filter <- FALSE
+    car_causer_filter <- FALSE
+    truck_causer_filter <- FALSE
+    bus_causer_filter <- FALSE
+    
+    if ("ped" %in% input$causer) {
+      ped_causer_filter <- TRUE
+    }
+    if ("bike" %in% input$causer) {
+      bike_causer_filter <- TRUE
+    }
+    if ("car" %in% input$causer) {
+      car_causer_filter <- TRUE
+    }
+    if ("truck" %in% input$causer) {
+      truck_causer_filter <- TRUE
+    }
+    if ("bus" %in% input$causer) {
+      bus_causer_filter <- TRUE
+    }
+
     # filter injuries
     
     no_injuries_filter <- FALSE
@@ -296,6 +320,40 @@ server <- function(input, output, session) {
                                        " + (data->>'motorcycle')::integer",
                                        " + (data->>'small_moped')::integer",
                                        " + (data->>'other_road_user')::integer) = '0')"), ""),
+            
+            
+            if_else((car_causer_filter |
+                      ped_causer_filter |
+                      bike_causer_filter |
+                      truck_causer_filter |
+                      bus_causer_filter |
+                      rest_causer_filter), " AND (", ""),
+            if_else(car_causer_filter, " (data->>'participants_01' in ('21', '22', '25'))", ""),
+            if_else(car_causer_filter & ped_causer_filter,
+                    " OR ", ""),
+            if_else(ped_causer_filter," (data->>'participants_01' in ('81', '84', '93'))", ""),
+            if_else((car_causer_filter |
+                       ped_causer_filter) & bike_causer_filter,
+                    " OR ", ""),
+            if_else(bike_causer_filter, " (data->>'participants_01' in ('71', '72', '03'))", ""),
+            if_else((car_causer_filter |
+                       ped_causer_filter |
+                       bike_causer_filter) & truck_causer_filter,
+                    " OR ", ""),
+            if_else(truck_causer_filter,
+                    " (data->>'participants_01' in ('40', '42', '44', '46', '43', '48', '51', '52', '53', '54', '55', '57', '58'))", ""),
+            if_else((car_causer_filter |
+                       ped_causer_filter |
+                       bike_causer_filter |
+                       truck_causer_filter) & bus_causer_filter,
+                    " OR ", ""),
+            if_else(bus_causer_filter, " (data->>'participants_01' in ('31', '32', '33', '34', '35'))", ""),
+            if_else((car_causer_filter |
+                       ped_causer_filter |
+                       bike_causer_filter |
+                       truck_causer_filter |
+                       bus_causer_filter), " )", ""),
+            
             if_else(no_injuries_filter | slightly_filter | seriously_filter | dead_filter, "AND (", ""),
             if_else(no_injuries_filter, paste0(" (data->>'slightly_injured' = '0'",
                               " AND data->>'seriously_injured' = '0'",
@@ -321,7 +379,7 @@ server <- function(input, output, session) {
   })
   
   # observe all filters and toggle the global variable to color the refresh button
-  observeEvent(c(input$vehicles, input$without_vehicles, input$injured,
+  observeEvent(c(input$vehicles, input$without_vehicles, input$causer, input$injured,
                  input$age_toggle, input$age_filter, input$bike_helmet, input$single_participant,
                  input$type, input$type_detail,
                  input$hour_filter, input$weekdays, input$months, input$years,
