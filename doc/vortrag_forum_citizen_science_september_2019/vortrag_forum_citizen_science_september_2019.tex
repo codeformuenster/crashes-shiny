@@ -6,29 +6,20 @@
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
 \usepackage{lmodern}
-\usepackage{ngerman}
+\usepackage[ngerman]{babel}
 \usepackage{graphicx}
+\usepackage{fontawesome5} % social media icons
 \usepackage{ccicons}
 
-\usepackage{natbib}
-
-% \usepackage{savesym}
-% \savesymbol{note} % beamer's \note now as \orignote
-% \usepackage[natbibapa,nodoi]{apacite}
-% \restoresymbol{apa}{note}% \note now again beamersnote, \apanote is APA \note command
+\usepackage{csquotes} % needed by biblatex for german quotes
+\usepackage[maxbibnames=99, % print all author names in bibliography
+            citestyle=numeric]{biblatex}
+\addbibresource{references.bib}
+\setbeamertemplate{bibliography item}{\insertbiblabel}
+\renewcommand*{\bibfont}{\scriptsize}
 
 \usepackage{tikz}
 \usetikzlibrary{calc,angles,decorations.pathmorphing,shapes}
-
-%
-% \AtBeginSection[]
-% {
-% \begin{frame}
-% \tableofcontents[currentsection]
-% \end{frame}
-% }
-%
-% \setbeamercovered{transparent}
 
 \beamertemplatenavigationsymbolsempty
 
@@ -48,51 +39,53 @@
 }
 
 \section{Einleitung}
+\subsection{Einleitung}
 
 \begin{frame}
-%   \frametitle{\secname}
+  \centering
   
   \includegraphics[width=\textwidth]{img/WN-screenshot.png}
   
   \vfill
-  {\scriptsize (Bildquelle: \url{https://www.wn.de/Startseite/Startseite-Schattenressort/3673899-Verkehrsunfallstatistik-2018-Ein-schlechter-Tag-fuer-Muenster})\par}
+  {\scriptsize (Bildquelle: \cite{Kalitschke2019})}
 \end{frame}
 
-\subsection{Entwicklung Unfälle mit Personenschaden}
-
 \begin{frame}
-  \frametitle{\subsecname}
+  \frametitle{Entwicklung Unfälle mit Personenschaden}
 
   \centering
   
   \resizebox{\linewidth}{!}{
-    \input{img/anzahl-unfaelle-pro-jahr}
-    }
+    \only<1>{\input{img/anzahl-unfaelle-pro-jahr1}}
+    \only<2>{\input{img/anzahl-unfaelle-pro-jahr2}}
+  }
   
     {\scriptsize (Grafik inspiriert durch: \cite[Folie~4]{Brockmann2017})\par}
 \end{frame}
 
-\begin{frame}
-  \frametitle{Entwicklung Unfallbeteiligte}
-  \centering
-  \includegraphics[width=0.925\textwidth]{img/anteil-unfaelle-beteiligte.png}
-  \begin{tikzpicture}[overlay,remember picture]
-	  \visible<2->{
-	    \node at ($(current page.center) + (1.0, 0.3)$) {\color{red}\footnotesize Rad-PKW, 2016--2018: 32\%};
-	  }
-	  \visible<2->{
-  	  \node at ($(current page.center) + (1.0, -0.7)$) {\color{red}\footnotesize PKW-PKW, 2016--2018: 20\%};
-  	}
-  	\visible<3->{
-  		\node at ($(current page.center) + (1.0, -1.1)$) {\color{red}\footnotesize Rad alleine, 2016--2018: 9\%};
-  	}
-  	\visible<3->{
-      \node at ($(current page.center) + (1.0, -1.6)$) {\color{red}\footnotesize Rad-Rad, 2016--2018: 9\%};
-    }
-	\end{tikzpicture}
-  \vfill
-  {\scriptsize (Bildquelle: \citealt[S.~11]{Baier2018})\par}
-\end{frame}
+\subsection{genauerer Blick in die Daten}
+
+% \begin{frame}
+%   \frametitle{Entwicklung Unfallbeteiligte}
+%   \centering
+%   \includegraphics[width=0.925\textwidth]{img/anteil-unfaelle-beteiligte.png}
+%   \begin{tikzpicture}[overlay,remember picture]
+% 	  \visible<2->{
+% 	    \node at ($(current page.center) + (1.0, 0.3)$) {\color{red}\footnotesize Rad-PKW, 2016--2018: 32\%};
+% 	  }
+% 	  \visible<2->{
+%   	  \node at ($(current page.center) + (1.0, -0.7)$) {\color{red}\footnotesize PKW-PKW, 2016--2018: 20\%};
+%   	}
+%   	\visible<3->{
+%   		\node at ($(current page.center) + (1.0, -1.1)$) {\color{red}\footnotesize Rad alleine, 2016--2018: 9\%};
+%   	}
+%   	\visible<3->{
+%       \node at ($(current page.center) + (1.0, -1.6)$) {\color{red}\footnotesize Rad-Rad, 2016--2018: 9\%};
+%     }
+% 	\end{tikzpicture}
+%   \vfill
+%   {\scriptsize (Bildquelle: \cite[S.~11]{Baier2018})\par}
+% \end{frame}
 
 \begin{frame}
   \frametitle{Entwicklung UnfallverursacherInnen}
@@ -100,7 +93,7 @@
   \includegraphics[width=0.925\textwidth]{img/hauptverursacher.png}
     \begin{tikzpicture}[overlay,remember picture]
 	  \visible<2->{
-      \node at ($(current page.center) + (1.5, 0.85)$) {\color{red}\footnotesize PKW, 2016--2018: 58\%};
+      \node at ($(current page.center) + (1.5, 1.2)$) {\color{red}\footnotesize PKW, 2016--2018: 58\%};
     }
 	  \visible<3->{
   	  \node at ($(current page.center) + (0.5, -0.9)$) {\color{red}\footnotesize Rad, kein Alleinunfall, 2016--2018: 20\%};
@@ -126,24 +119,25 @@
       \item 12 Seiten, sehr selektiv
       \item Fokus auf hohen Anteil Rad-Unfälle
       \item nur implizit: PKW meist Unfallverursacher
-      \item viele Fragen bleiben offen
-    \end{itemize}
-    \pause
-    \item umfangreiche, wichtige Studie der Unfallforschung der Versicherer \cite{Baier2018}
-    \begin{itemize}
-      \item mehr als 60 Seiten, Kurzfassung 20 Seiten
-      \item sehr detailliert, schwer zugänglich für Laien
+      \begin{itemize}
+        \item Bei fast 80\% der Rad-PKW-Unfälle mit Personenschaden ist PKW Hauptverursacher!
+      \end{itemize}
     \end{itemize}
       \pause
-      \item nicht georeferenziert
-      \item nicht interaktiv
+    \item Studie der Unfallforschung der Versicherer \cite{Baier2018}
+    \begin{itemize}
+      \item mehr als 60 Seiten, Kurzfassung 20 Seiten
+      \item sehr detailliert
+      \item relativ schwer zugänglich für Laien
+    \end{itemize}
+    \pause
+    \item nicht interaktiv
+    \item nicht georeferenziert
   \end{itemize}
 \end{frame}
 
-\subsection{https://crashes.codeformuenster.org}
-
 \begin{frame}
-  \frametitle{Datengrundlage}
+  \frametitle{Datengrundlage für \href{https://crashes.codeformuenster.org}{\texttt{crashes.codeformuenster.org}}}
   
   \begin{itemize}
     \item Rohdaten aller Unfälle von der Polizei Münster 2007-2018
@@ -153,24 +147,28 @@
       \item manuelle Ortsangaben
     \end{itemize}
     \pause
-    \item Gerald hat Daten aufwändig geokodiert (Großteil), bereinigt und als Datenbank zugänglich gemacht
-  \end{itemize}
-  
+    \item Gerald hat Daten aufwändig bereinigt, geokodiert (Großteil) und als Datenbank zugänglich gemacht
+  \end{itemize}  
 \end{frame}
+
+\subsection{https://crashes.codeformuenster.org}
 
 \begin{frame}
   \frametitle{\url{https://crashes.codeformuenster.org}}
   
-  \href{beispielpraesentation-crashes.mkv}{\texttt{https://crashes.codeformuenster.org}: Beispielvorführung}
+  \href{beispielpraesentation-crashes.mkv}{\texttt{https://crashes.codeformuenster.org}: Beispielvorführung als Video}
   
 \end{frame}
 
 \begin{frame}
   \frametitle{Fahrradstraße?}
   
+  \centering
+  
   \includegraphics[width=\textwidth]{img/schillerstrasse.jpg}
   
-    {\scriptsize (Bildquelle: \url{https://fahrradstadt.ms/2018/02/23/fahrradstrassen-ist-bunt-besser/})\par}
+  \vfill  
+  {\scriptsize (Bildquelle: \cite{Chrobak2018})}
 \end{frame}
 
 \begin{frame}
@@ -179,7 +177,8 @@
   
   \includegraphics[width=0.9\textwidth]{img/unfalltyp-details.png}
   
-  {\scriptsize (Bildquelle: \url{https://recht.nrw.de/lmi/owa/br_show_anlage?p_id=15549})\par}
+  \vfill
+  {\scriptsize (Bildquelle: \cite[\href{https://recht.nrw.de/lmi/owa/br_show_anlage?p_id=15549}{Anlage 9}]{IMNRW2019})\par}
 \end{frame}
 
 \begin{frame}
@@ -188,9 +187,6 @@
   \begin{columns}
     \begin{column}{0.5\textwidth}
       \begin{itemize}
-    \item {\color{blue} Hammer Str.: ca. 7.500 RadlerInnen/Tag (2018)}
-    \item {\color{blue} Wolbecker Str.: ca. 9.500 RadlerInnen/Tag (2018)}
-    \item Promenade: ca. 12.800 RadlerInnen/Tag (2018)
     \item Radunfälle 2007--2018
     \begin{itemize}
       \item ohne PKW
@@ -208,47 +204,56 @@
 \section{Ausblick}
 
 \begin{frame}
-  \frametitle{Weitere Schritte}
-  
+  \frametitle{Weitere Schritte}  
   \centering  
   
   \begin{itemize}
     \item "`Ungenauigkeiten bei der Lokalisierung der Unfälle"' \cite[S.~38]{Baier2018}
-    \includegraphics[width=0.8\textwidth]{img/editor-screenshot.png}
-    \item filtern nach (vermuteter) Unfallursache
-    \item räumlicher Filter
-    \item \ldots
+    \includegraphics[width=0.7\textwidth]{img/editor-screenshot.png}
+    \item weitere Filter
+    \item da freier Quelltext:
+    \begin{itemize}
+      \item \href{https://github.com/codeformuenster/crashes-shiny/issues}{\usebeamercolor[fg]{frametitle}Eure Ideen!}
+      \item mitentwickeln: \href{https://codeformuenster.org}{\usebeamercolor[fg]{frametitle}jeden Dienstag, 18:30 Uhr, drei:klang}
+    \end{itemize}
   \end{itemize}
 \end{frame}
 
 \begin{frame}
-  Danke für die Aufmerksamkeit!
+  \frametitle{Danke für die Aufmerksamkeit!}
   
-  Besonderen Dank an:
+  \centering
+  \begin{columns}
+    \begin{column}{0.36\linewidth}
+      Besonderen Dank an:  
+      \begin{itemize}
+        \item Gerald Pape\\(Code for Münster)
+        \item Christian Römer (Code for Münster)
+        \item Tobias Bradtke (Code for Münster)
+        \item ADFC Münster
+        \item IG Fahrradstadt Münster
+      \end{itemize}
+    \end{column}
+    \hfill
+    \begin{column}{0.6515\linewidth}
+      Kontakt (ich bin auf Jobsuche \faSmileWink[regular]):
+      \begin{itemize}
+        \item[\faEnvelope] \href{mailto:t.terstiege@posteo.de}{\texttt{t.terstiege@posteo.de}}
+        \item[\faComments] \href{xmpp:thomas@kartoffelsalat.ddns.net}{\texttt{thomas@kartoffelsalat.ddns.net}}
+        \item[\faGlobe] \href{https://kartoffelsalat.ddns.net}{\texttt{kartoffelsalat.ddns.net}}
+        \item[\faMastodon] \href{https://social.wiuwiu.de/@kartoffelsalat}{\texttt{kartoffelsalat@social.wiuwiu.de}}
+        \item[\faDiaspora] \href{https://diasp.eu/u/kartoffelsalat}{\texttt{kartoffelsalat@diasp.eu}}
+        \item[\faTwitter]  \href{https://twitter.com/krtfflslt}{\texttt{@krtfflslt}}
+        \item[\faGithub]  \href{https://github.com/silberzwiebel}{\texttt{silberzwiebel}}
+      \end{itemize}
+    \end{column}
+  \end{columns}
 
 \end{frame}
 
-\section{Literaturverzeichnis}
-\begin{frame}[plain]%[allowframebreaks]
-  \frametitle{\secname{}} %\insertcontinuationcount}
-% 	\vspace*{0.35cm}
-	\begin{center}
-		\LARGE\textbf{Vielen Dank!}
-	\end{center}
-	
-%  	\setlength{\linewidth}{1.085\linewidth}
-% 	\vspace*{-0.4cm}
-%   \textbf{\footnotesize References}
-%   \renewcommand\bibliographytypesize{\fontsize{4}{4}\selectfont}
-% 	\bibliographystyle{apacite}	
-  \bibliographystyle{plain}
-	\bibliography{references}
+\begin{frame}
+  \frametitle{Quellen}
+  \printbibliography[title=Quellen]
 \end{frame}
 
-\newcounter{finalframe}
-\setcounter{finalframe}{\value{framenumber}}
-\appendix
-\begin{frame}[allowframebreaks,fragile]
-\end{frame}
-\setcounter{framenumber}{\value{finalframe}}
 \end{document}
