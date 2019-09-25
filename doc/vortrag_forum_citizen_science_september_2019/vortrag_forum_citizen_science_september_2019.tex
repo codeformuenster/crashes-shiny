@@ -26,7 +26,7 @@
 \title[Sicherer Radfahren \hspace*{4cm} \insertframenumber/\inserttotalframenumber]{Sicherer Radfahren}
 \subtitle{Wie offene Unfalldaten helfen können}
 \author[Dr.\,Thomas Terstiege]{Dr.\,Thomas Terstiege}
-\institute[Code for Münster]{Code for Münster}
+\institute[Dr.\ Thomas Terstiege, Code for Münster]{Code for Münster}
 \date{26. September 2019\\{\scriptsize{}Forum Citizen Science 2019}}%\\Universität Münster, Institut für Geoinformatik\par}}
 
 \begin{document}
@@ -91,9 +91,12 @@
   \frametitle{Entwicklung UnfallverursacherInnen (Quelle: \cite{Baier2018})}
   \centering  
   \includegraphics[width=0.925\textwidth]{img/hauptverursacher.png}
-    \begin{tikzpicture}[overlay,remember picture]
+  \begin{tikzpicture}[overlay,remember picture]
 	  \visible<2->{
       \node at ($(current page.center) + (1.5, 1.2)$) {\color{red}\footnotesize PKW, 2016--2018: 58\%};
+    }
+    \visible<5->{
+      \node at ($(current page.center) + (1.45, 0.9)$) {\color{red}\footnotesize davon Alleinunfall: < 3\%};
     }
 	  \visible<3->{
   	  \node at ($(current page.center) + (0.5, -0.9)$) {\color{red}\footnotesize Rad, kein Alleinunfall, 2016--2018: 20\%};
@@ -115,22 +118,8 @@
   
   \begin{itemize}
     \item Verkehrsunfallstatistik der Polizei \cite{Polizei2019}
-    \begin{itemize}
-      \item 12 Seiten, sehr selektiv
-      \item Fokus auf hohen Anteil Rad-Unfälle
-      \item nur implizit: PKW meist Unfallverursacher
-      \pause
-      \begin{itemize}
-        \item Bei fast 80\% der Rad-PKW-Unfälle mit Personenschaden ist PKW Hauptverursacher!
-      \end{itemize}
-    \end{itemize}
-      \pause
+    \pause
     \item Studie der Unfallforschung der Versicherer \cite{Baier2018}
-    \begin{itemize}
-      \item mehr als 60 Seiten, Kurzfassung 20 Seiten
-      \item sehr detailliert
-      \item relativ schwer zugänglich für Laien
-    \end{itemize}
     \pause
     \item nicht interaktiv
   \end{itemize}
@@ -143,7 +132,6 @@
     \item Rohdaten aller Unfälle von der Polizei Münster 2007-2018
     \begin{itemize}
       \item 1 Excel-Tabelle pro Jahr
-      \item herausfordernde Datenqualität
     \end{itemize}
     \pause
     \item Gerald hat Daten aufwändig bereinigt, geokodiert (Großteil) und als Datenbank zugänglich gemacht
@@ -152,11 +140,63 @@
 
 \subsection{https://crashes.codeformuenster.org}
 
-\begin{frame}
+\begin{frame}[plain]
   \frametitle{\url{https://crashes.codeformuenster.org}}
   
-  \href{beispielpraesentation-crashes.mkv}{\texttt{https://crashes.codeformuenster.org}: Beispielvorführung als Video}
+  \includegraphics[width=1.1\textwidth]{img/einfuehrung-crashes.png}
   
+  \begin{tikzpicture}[overlay,remember picture]
+  
+    \visible<2->{
+      \node[align=left] at ($(current page.center) + (-3.25, 1.2)$) {\fcolorbox{red}{white}{\parbox{0.32\linewidth}{interaktive Karte mit leicht erkennbaren Unfallhäufungsstellen}}};
+    }
+    
+    \visible<3->{
+      \node at ($(current page.center) + (-2.0, -3.5)$) {\fcolorbox{red}{white}{\parbox{0.32\linewidth}{umfangreiche Filtermöglichkeiten}}};
+    }
+    
+    \visible<4->{
+      \node at ($(current page.center) + (-4.25, -1.0)$) {\fcolorbox{red}{white}{Verkehrsmittel}};
+    }
+
+    \visible<5->{
+      \node at ($(current page.center) + (-4.25, -2.5)$) {\fcolorbox{red}{white}{Verletzte}};
+    }
+
+    \visible<6->{
+      \node at ($(current page.center) + (-1.25, -1.75)$) {\fcolorbox{red}{white}{Unfalltypen}};
+    }
+    
+    \visible<7->{
+      \node at ($(current page.center) + (1.75, -2.0)$) {\fcolorbox{red}{white}{\parbox{0.25\linewidth}{Zeitfilter (Jahr, Monat, Wochentag, Uhrzeit)}}};
+    }
+        
+    \visible<8->{
+      \node at ($(current page.center) + (4.75, -2.0)$) {\fcolorbox{red}{white}{\parbox{0.225\linewidth}{Kartenoptionen und Downloadmöglichkeit}}};
+    }
+  \end{tikzpicture}
+\end{frame}
+
+\begin{frame}[plain]
+  \frametitle{\url{https://crashes.codeformuenster.org}}
+  \centering
+  
+  \includegraphics[width=0.75\textwidth]{img/detailansicht.png}
+  
+  \begin{tikzpicture}[overlay,remember picture]
+    \node[align=left] at ($(current page.center) + (-4.5, 1.0	)$) {\fcolorbox{red}{white}{\parbox{0.2\linewidth}{Detailansicht (Uhrzeit, Beteiligte, Alter, etc.)}}};
+  \end{tikzpicture}
+\end{frame}
+
+
+\begin{frame}[plain]
+  \frametitle{\url{https://crashes.codeformuenster.org}}
+
+  \includegraphics[width=1.1\textwidth]{img/parkunfaelle-schillerstrasse.png}
+  
+  \begin{tikzpicture}[overlay,remember picture]
+    \node[align=left] at ($(current page.center) + (-3.25, 1.2)$) {\fcolorbox{red}{white}{\parbox{0.275\linewidth}{Unfallhäufung mit parkenden Autos (2007--2018)}}};
+  \end{tikzpicture}
 \end{frame}
 
 \begin{frame}
@@ -223,27 +263,23 @@
   
   \centering
   \begin{columns}
+  \begin{column}{0.67\linewidth}
+      Kontakt (ich bin auf Jobsuche \faSmileWink[regular]):
+      \begin{itemize}
+        \item[\faEnvelope] \href{mailto:t.terstiege@posteo.de}{\texttt{t.terstiege@posteo.de}}
+        \item[\faMastodon] \href{https://social.wiuwiu.de/@kartoffelsalat}{\texttt{@kartoffelsalat@social.wiuwiu.de}}
+        \item[\faTwitter]  \href{https://twitter.com/krtfflslt}{\texttt{@krtfflslt}}
+      \end{itemize}
+    \end{column}
+    \hfill
     \begin{column}{0.36\linewidth}
-      Besonderen Dank an:  
+      Besonderen Dank an:
       \begin{itemize}
         \item Gerald Pape\\(Code for Münster)
         \item Christian Römer (Code for Münster)
         \item Tobias Bradtke (Code for Münster)
         \item ADFC Münster
         \item IG Fahrradstadt Münster
-      \end{itemize}
-    \end{column}
-    \hfill
-    \begin{column}{0.6515\linewidth}
-      Kontakt (ich bin auf Jobsuche \faSmileWink[regular]):
-      \begin{itemize}
-        \item[\faEnvelope] \href{mailto:t.terstiege@posteo.de}{\texttt{t.terstiege@posteo.de}}
-        \item[\faComments] \href{xmpp:thomas@kartoffelsalat.ddns.net}{\texttt{thomas@kartoffelsalat.ddns.net}}
-        \item[\faGlobe] \href{https://kartoffelsalat.ddns.net}{\texttt{kartoffelsalat.ddns.net}}
-        \item[\faMastodon] \href{https://social.wiuwiu.de/@kartoffelsalat}{\texttt{kartoffelsalat@social.wiuwiu.de}}
-        \item[\faDiaspora] \href{https://diasp.eu/u/kartoffelsalat}{\texttt{kartoffelsalat@diasp.eu}}
-        \item[\faTwitter]  \href{https://twitter.com/krtfflslt}{\texttt{@krtfflslt}}
-        \item[\faGithub]  \href{https://github.com/silberzwiebel}{\texttt{silberzwiebel}}
       \end{itemize}
     \end{column}
   \end{columns}
