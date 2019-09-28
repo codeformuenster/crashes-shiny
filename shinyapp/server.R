@@ -158,6 +158,33 @@ server <- function(input, output, session) {
       type_detail_filter <- NA
     }
     
+    crash_cause_temp <- input$crash_cause
+
+    # remove whitespace
+    crash_cause_temp <- gsub(" ", "", crash_cause_temp, fixed = TRUE)
+    # split at ','
+    crash_cause_temp <- strsplit(crash_cause_temp, split = ",")
+    # create a vector
+    crash_cause_temp <- unlist(crash_cause_temp)
+    # only consider two-letter codes
+    crash_cause_temp <- crash_cause_temp[nchar(crash_cause_temp) == 2]
+    
+    if (length(crash_cause_temp) > 0) {
+      # create a string
+      crash_cause_filter <- "("
+      for (tidx in 1:length(crash_cause_temp)) {
+        if (tidx != length(crash_cause_temp)) {
+          crash_cause_filter <- paste0(crash_cause_filter, "'" , crash_cause_temp[tidx], "',")
+        } else {
+          # no comma after last entry
+          crash_cause_filter <- paste0(crash_cause_filter, "'" , crash_cause_temp[tidx], "'")
+        }
+      }
+      crash_cause_filter <- paste0(crash_cause_filter, ")")
+    } else {
+      crash_cause_filter <- NA
+    }
+    
     if (length(input$years) > 0) {
       year_filter <- "("
       for (yidx in 1:length(input$years)) {
@@ -271,6 +298,7 @@ server <- function(input, output, session) {
             "AND resource_name = 'record'",
             "AND SUBSTRING(data->>'accident_type', 1, 1) in ", type_filter,
             if_else(!is.na(type_detail_filter), paste0("AND data->>'accident_type' in ", type_detail_filter), ""),
+            if_else(!is.na(crash_cause_filter), paste0("AND data->>'cause_2' in ", crash_cause_filter), ""),
             if_else(nchar(year_filter) > 0, paste0("AND date_part('year', date(data->>'date')) in ", year_filter), ""),
             "AND date_part('month', date(data->>'date')) in ", month_filter,
             "AND date_part('dow', date(data->>'date')) in ", weekdays_filter,
@@ -326,8 +354,7 @@ server <- function(input, output, session) {
                       ped_causer_filter |
                       bike_causer_filter |
                       truck_causer_filter |
-                      bus_causer_filter |
-                      rest_causer_filter), " AND (", ""),
+                      bus_causer_filter), " AND (", ""),
             if_else(car_causer_filter, " (data->>'participants_01' in ('21', '22', '25'))", ""),
             if_else(car_causer_filter & ped_causer_filter,
                     " OR ", ""),
@@ -381,7 +408,7 @@ server <- function(input, output, session) {
   # observe all filters and toggle the global variable to color the refresh button
   observeEvent(c(input$vehicles, input$without_vehicles, input$causer, input$injured,
                  input$age_toggle, input$age_filter, input$bike_helmet, input$single_participant,
-                 input$type, input$type_detail,
+                 input$type, input$type_detail, input$crash_cause,
                  input$hour_filter, input$weekdays, input$months, input$years,
                  input$years_button, input$heatmap_toggle, input$markers_toggle,
                  input$heatmap_size, input$heatmap_intensity), {
@@ -575,12 +602,17 @@ server <- function(input, output, session) {
                              crashes_filtered_with_location$motorcycle +
                              crashes_filtered_with_location$small_moped +
                              crashes_filtered_with_location$other_road_user,
-                           ", ",
+                           ",<br>",
                            a(href = "https://recht.nrw.de/lmi/owa/br_show_anlage?p_id=15549",
                              target = "_blank", "Unfalltyp"),
                            ": ",
                            crashes_filtered_with_location$accident_type,
-                           ", id: ", crashes_filtered_with_location$id,
+                           ", ",
+                          a(href = "https://recht.nrw.de/lmi/owa/br_show_anlage?p_id=15541",
+                             target = "_blank", "Unfallursache"),
+                           ": ",
+                           crashes_filtered_with_location$cause_2,
+                           ",<br>id: ", crashes_filtered_with_location$id,
                            ", ",
                            "<br>(Ort falsch? Hier korrigieren! [Funktion bald verfügbar]",
                            # a(href = "https://ms-verkehrsunfaelle-beta.netlify.com/", target = "_blank", "Hier korrigieren!"),

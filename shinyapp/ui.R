@@ -90,7 +90,7 @@ ui <- navbarPage(
               ),
             selectizeInput(
                  "causer",
-                 "HauptverursacherIn (ODER-Verknüpfung)",
+                 "HauptverursacherIn (lt. Polizei; ODER-Verknüpfung)",
                  choices = c("Fuß" = "ped",
                              "Rad" = "bike",
                              "PKW" = "car",
@@ -140,6 +140,11 @@ ui <- navbarPage(
             textInput(
                "type_detail",
                HTML("dreistelliger Unfalltyp (<a href = 'https://recht.nrw.de/lmi/owa/br_show_anlage?p_id=15549'>Details</a>; mit Komma trennen, ODER-Verknüpfung)"),
+               value = ""
+            ),
+            textInput(
+               "crash_cause",
+               HTML("zweistellige Unfallursache (<a href = 'https://recht.nrw.de/lmi/owa/br_show_anlage?p_id=15541'>Details</a>; mit Komma trennen, ODER-Verknüpfung)"),
                value = ""
             )
             ),
