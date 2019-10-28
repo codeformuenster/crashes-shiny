@@ -335,12 +335,13 @@ server <- function(input, output, session) {
             if_else(bike_filter, " AND data->>'bicycle' > '0'", ""),
             if_else(truck_filter, " AND data->>'lorry' > '0'", ""),
             if_else(bus_filter, " AND data->>'omnibus' > '0'", ""),
-            if_else(rest_filter, paste0(" AND (((data->>'moped')::integer",
-                                       " + (data->>'motorcycle')::integer",
-                                       " + (data->>'small_moped')::integer",
-                                       " + (data->>'other_road_user')::integer) > '0')"), ""),
-            if_else(without_car_filter, " AND data->>'car' = '0'", ""),
-            if_else(without_ped_filter," AND data->>'pedestrian' = '0'", ""),
+            if_else(rest_filter, paste0(" AND ( data->>'moped' > '0'",
+                                       " OR data->>'motorcycle' > '0' ",
+                                       " OR data->>'small_moped' > '0'",
+                                       " OR data->>'other_road_user' > '0')"), ""),
+            # TODO: proper check for NaN's in the query!
+            if_else(without_car_filter, " AND (data->>'car')::integer = 'NaN'::integer", ""),
+            if_else(without_ped_filter," AND NOT (data->>'pedestrian' > '0')", ""),
             if_else(without_bike_filter, " AND data->>'bicycle' = '0'", ""),
             if_else(without_truck_filter, " AND data->>'lorry' = '0'", ""),
             if_else(without_bus_filter, " AND data->>'omnibus' = '0'", ""),
@@ -397,7 +398,7 @@ server <- function(input, output, session) {
     
     filtered <- dbGetQuery(db_con, sql_string)
     
-    # print(head(filtered))
+    print(head(filtered))
     
     # reset color of refresh button
     global_vars$filter_changed <- FALSE
@@ -483,9 +484,9 @@ server <- function(input, output, session) {
                                 ""),
                         "<br>",
                         # pmax is to only count non-negative numbers
-                        sum(pmax(crashes_filtered()$lv, 0)), " Leichtverletzte, ",
-                        sum(pmax(crashes_filtered()$sv, 0)), " Schwerverletzte, ",
-                        sum(pmax(crashes_filtered()$deaths, 0)), " Getötete")
+                        sum(pmax(crashes_filtered()$lv, 0, na.rm = TRUE)), " Leichtverletzte, ",
+                        sum(pmax(crashes_filtered()$sv, 0, na.rm = TRUE)), " Schwerverletzte, ",
+                        sum(pmax(crashes_filtered()$deaths, 0, na.rm = TRUE)), " Getötete")
             )
   })
 
@@ -585,24 +586,42 @@ server <- function(input, output, session) {
                            ".", crashes_filtered_with_location$year,
                            ", ", crashes_filtered_with_location$hour,
                            ":", sprintf("%02d", crashes_filtered_with_location$minute), " Uhr",
-                           ", ", crashes_filtered_with_location$street,
+                           "<br>",
+                           crashes_filtered_with_location$street,
                            " ", crashes_filtered_with_location$street_additional,
-                           ", Alter: ", crashes_filtered_with_location$age1, " & ", crashes_filtered_with_location$age2,
-                           ",<br>Tote: ", crashes_filtered_with_location$deaths,
-                           ", Schwerverletzte: ", crashes_filtered_with_location$sv,
-                           ", Leichtverletzte: ", crashes_filtered_with_location$lv,
-                           ",<br>PKW: ", crashes_filtered_with_location$car,
-                           ", LKW: ", crashes_filtered_with_location$lorry,
-                           ", Bus: ", crashes_filtered_with_location$omnibus,
-                           ", Fußgänger: ", crashes_filtered_with_location$pedestrian,
-                           ", Fahrräder: ", crashes_filtered_with_location$bicycle,
-                           ", sonstige Verkehrsmittel: ", 
-                             crashes_filtered_with_location$moped +
-                             crashes_filtered_with_location$omnibus +
-                             crashes_filtered_with_location$motorcycle +
-                             crashes_filtered_with_location$small_moped +
-                             crashes_filtered_with_location$other_road_user,
-                           ",<br>",
+                           "<br>",
+                           if_else(!is.na(crashes_filtered_with_location$age1),
+                                   paste0(" Alter 1: ", crashes_filtered_with_location$age1), ""),
+                           if_else(!is.na(crashes_filtered_with_location$age2),
+                                   paste0(" Alter 2: ", crashes_filtered_with_location$age2), ""),
+                           "<br>",
+                           if_else(!is.na(crashes_filtered_with_location$deaths),
+                                   paste0(crashes_filtered_with_location$deaths, " Tote"), ""),
+                           if_else(!is.na(crashes_filtered_with_location$sv),
+                                   paste0(crashes_filtered_with_location$sv, " Schwerverletzte"), ""),
+                           if_else(!is.na(crashes_filtered_with_location$lv),
+                                   paste0(crashes_filtered_with_location$lv, " Leichtverletzte"), ""),
+                           "<br>",
+                           "<br>",
+                           if_else(!is.na(crashes_filtered_with_location$car),
+                                  paste0(crashes_filtered_with_location$car, " PKW<br>"), ""),
+                           if_else(!is.na(crashes_filtered_with_location$lorry),
+                                   paste0(crashes_filtered_with_location$lorry, " LKW<br>"), ""),
+                           if_else(!is.na(crashes_filtered_with_location$omnibus),
+                                   paste0(crashes_filtered_with_location$omnibus, " Bus(se)<br>"), ""),
+                           if_else(!is.na(crashes_filtered_with_location$pedestrian),
+                                   paste0(crashes_filtered_with_location$pedestrian, " Fußgänger<br>"), ""),
+                           if_else(!is.na(crashes_filtered_with_location$bicycle),
+                                   paste0(crashes_filtered_with_location$bicycle, " Fahrrad/Fahrräder<br>"), ""),
+                           if_else(!is.na(crashes_filtered_with_location$moped), 
+                                   paste0(crashes_filtered_with_location$moped, " Moped(s)<br>"), ""),
+                           if_else(!is.na(crashes_filtered_with_location$motorcycle), 
+                                   paste0(crashes_filtered_with_location$motorcycle, " Motorrad/Motorräder<br>"), ""),
+                           if_else(!is.na(crashes_filtered_with_location$small_moped), 
+                                   paste0(crashes_filtered_with_location$small_moped, " kleine(s) Moped(s)<br>"), ""),
+                           if_else(!is.na(crashes_filtered_with_location$other_road_user), 
+                                   paste0(crashes_filtered_with_location$other_road_user, " sonstige(s) Verkehrsmittel"), ""),
+                           "<br>",
                            a(href = "https://recht.nrw.de/lmi/owa/br_show_anlage?p_id=15549",
                              target = "_blank", "Unfalltyp"),
                            ": ",
