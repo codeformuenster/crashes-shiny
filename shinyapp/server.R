@@ -486,10 +486,9 @@ server <- function(input, output, session) {
                                        "),"),
                                 ""),
                         "<br>",
-                        # pmax is to only count non-negative numbers
-                        sum(pmax(crashes_filtered()$lv, 0, na.rm = TRUE)), " Leichtverletzte, ",
-                        sum(pmax(crashes_filtered()$sv, 0, na.rm = TRUE)), " Schwerverletzte, ",
-                        sum(pmax(crashes_filtered()$deaths, 0, na.rm = TRUE)), " Getötete")
+                        sum(crashes_filtered()$lv, na.rm = TRUE), " Leichtverletzte, ",
+                        sum(crashes_filtered()$sv, na.rm = TRUE), " Schwerverletzte, ",
+                        sum(crashes_filtered()$deaths, na.rm = TRUE), " Getötete")
             )
   })
 
