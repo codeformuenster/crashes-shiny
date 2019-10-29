@@ -20,6 +20,9 @@ server <- function(input, output, session) {
   
   crashes_filtered <- eventReactive(global_vars$update_visible_data, ignoreInit = TRUE, {
     
+    # de-validate map
+    # filtered <- NULL
+    
     # filter involved vehicles (with)
     
     ped_filter <- FALSE
@@ -330,25 +333,25 @@ server <- function(input, output, session) {
                          " AND (data->>'participants_age_02')::integer <= ", input$age_filter[2], ") )")
                   , ")") # end if_else 2015-2018
             ), ""), # end if_else age_toggle
-            if_else(car_filter, " AND data->>'car' > '0'", ""),
-            if_else(ped_filter," AND data->>'pedestrian' > '0'", ""),
-            if_else(bike_filter, " AND data->>'bicycle' > '0'", ""),
-            if_else(truck_filter, " AND data->>'lorry' > '0'", ""),
-            if_else(bus_filter, " AND data->>'omnibus' > '0'", ""),
-            if_else(rest_filter, paste0(" AND ( data->>'moped' > '0'",
-                                       " OR data->>'motorcycle' > '0' ",
-                                       " OR data->>'small_moped' > '0'",
-                                       " OR data->>'other_road_user' > '0')"), ""),
+            if_else(car_filter, " AND data->>'car' IS NOT NULL", ""),
+            if_else(ped_filter," AND data->>'pedestrian' IS NOT NULL", ""),
+            if_else(bike_filter, " AND data->>'bicycle' IS NOT NULL", ""),
+            if_else(truck_filter, " AND data->>'lorry' IS NOT NULL", ""),
+            if_else(bus_filter, " AND data->>'omnibus' IS NOT NULL", ""),
+            if_else(rest_filter, paste0(" AND ( data->>'moped' IS NOT NULL",
+                                       " OR data->>'motorcycle' IS NOT NULL ",
+                                       " OR data->>'small_moped' IS NOT NULL",
+                                       " OR data->>'other_road_user' IS NOT NULL)"), ""),
             # TODO: proper check for NaN's in the query!
-            if_else(without_car_filter, " AND (data->>'car')::integer = 'NaN'::integer", ""),
-            if_else(without_ped_filter," AND NOT (data->>'pedestrian' > '0')", ""),
-            if_else(without_bike_filter, " AND data->>'bicycle' = '0'", ""),
-            if_else(without_truck_filter, " AND data->>'lorry' = '0'", ""),
-            if_else(without_bus_filter, " AND data->>'omnibus' = '0'", ""),
-            if_else(without_rest_filter, paste0(" AND (((data->>'moped')::integer",
-                                       " + (data->>'motorcycle')::integer",
-                                       " + (data->>'small_moped')::integer",
-                                       " + (data->>'other_road_user')::integer) = '0')"), ""),
+            if_else(without_car_filter, " AND data->>'car' IS NULL", ""),
+            if_else(without_ped_filter," AND data->>'pedestrian' IS NULL", ""),
+            if_else(without_bike_filter, " AND data->>'bicycle' IS NULL", ""),
+            if_else(without_truck_filter, " AND data->>'lorry' IS NULL", ""),
+            if_else(without_bus_filter, " AND data->>'omnibus' IS NULL", ""),
+            if_else(without_rest_filter, paste0(" AND (data->>'moped' IS NULL",
+                                       " AND data->>'motorcycle' IS NULL",
+                                       " AND data->>'small_moped' IS NULL",
+                                       " AND data->>'other_road_user' IS NULL)"), ""),
             
             
             if_else((car_causer_filter |
@@ -383,15 +386,15 @@ server <- function(input, output, session) {
                        bus_causer_filter), " )", ""),
             
             if_else(no_injuries_filter | slightly_filter | seriously_filter | dead_filter, "AND (", ""),
-            if_else(no_injuries_filter, paste0(" (data->>'slightly_injured' = '0'",
-                              " AND data->>'seriously_injured' = '0'",
-                              " AND data->>'deaths' = '0')"), ""),
+            if_else(no_injuries_filter, paste0(" (data->>'slightly_injured' IS NULL",
+                              " AND data->>'seriously_injured' IS NULL",
+                              " AND data->>'deaths' IS NULL)"), ""),
             if_else(no_injuries_filter & slightly_filter, " OR ", ""),
-            if_else(slightly_filter, " data->>'slightly_injured' > '0'", ""),
+            if_else(slightly_filter, " data->>'slightly_injured' IS NOT NULL", ""),
             if_else((no_injuries_filter | slightly_filter) & seriously_filter, " OR ", ""),
-            if_else(seriously_filter," data->>'seriously_injured' > '0'", ""),
+            if_else(seriously_filter," data->>'seriously_injured' IS NOT NULL", ""),
             if_else((no_injuries_filter | slightly_filter | seriously_filter) & dead_filter, " OR ", ""),
-            if_else(dead_filter," data->>'deaths' > '0'", ""),
+            if_else(dead_filter," data->>'deaths' IS NOT NULL", ""),
             if_else(no_injuries_filter | slightly_filter | seriously_filter | dead_filter, ")", ""))
     
     print(sql_string)
@@ -594,13 +597,12 @@ server <- function(input, output, session) {
                                    paste0(" Alter 1: ", crashes_filtered_with_location$age1), ""),
                            if_else(!is.na(crashes_filtered_with_location$age2),
                                    paste0(" Alter 2: ", crashes_filtered_with_location$age2), ""),
-                           "<br>",
                            if_else(!is.na(crashes_filtered_with_location$deaths),
-                                   paste0(crashes_filtered_with_location$deaths, " Tote"), ""),
+                                   paste0("<br>", crashes_filtered_with_location$deaths, " Tote"), ""),
                            if_else(!is.na(crashes_filtered_with_location$sv),
-                                   paste0(crashes_filtered_with_location$sv, " Schwerverletzte"), ""),
+                                   paste0("<br>", crashes_filtered_with_location$sv, " Schwerverletzte"), ""),
                            if_else(!is.na(crashes_filtered_with_location$lv),
-                                   paste0(crashes_filtered_with_location$lv, " Leichtverletzte"), ""),
+                                   paste0("<br>", crashes_filtered_with_location$lv, " Leichtverletzte"), ""),
                            "<br>",
                            "<br>",
                            if_else(!is.na(crashes_filtered_with_location$car),
@@ -631,9 +633,9 @@ server <- function(input, output, session) {
                              target = "_blank", "Unfallursache"),
                            ": ",
                            crashes_filtered_with_location$cause_2,
-                           ",<br>id: ", crashes_filtered_with_location$id,
-                           ", ",
-                           "<br>(Ort falsch? Hier korrigieren! [Funktion bald verfügbar]",
+                           "<br>id: ", crashes_filtered_with_location$id,
+                           "<br>",
+                           "(Ort falsch? Hier korrigieren! [Funktion bald verfügbar]",
                            # a(href = "https://ms-verkehrsunfaelle-beta.netlify.com/", target = "_blank", "Hier korrigieren!"),
                            ")"),
              group = "Markers") %>%
