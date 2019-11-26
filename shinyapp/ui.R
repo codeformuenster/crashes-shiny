@@ -108,7 +108,7 @@ ui <- navbarPage(
                           "Leichtverletzte" = "slightly", 
                           "Schwerverletzte" = "seriously",
                           "Tote" = "dead"),
-              selected = c(),
+              selected = c("slightly", "seriously", "dead"),
               multiple = TRUE,
               options = list(
                 'plugins' = list('remove_button')
