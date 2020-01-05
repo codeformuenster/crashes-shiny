@@ -15,7 +15,7 @@ GPLv3 licensed, based on [the prototype](https://github.com/mammykins/App-cherry
 
 ### Quelltext
 
-Copyright © 2018-2019 Code for Münster
+Copyright © 2018-2020 Code for Münster
 
 #### Deutsch 
 
