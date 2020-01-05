@@ -21,7 +21,49 @@ ui <- navbarPage(
             ), # end tabPanel Rohdaten
    
    tabPanel("Über diese Seite",
-            h4("Datenquelle"),
+            h3("Über dieses Projekt"),
+            p("In Münster gibt es im Vergleich zu anderen NRW-Städten leider
+               viele Verkehrsunfälle. Trotz der seit 2007 bestehenden
+               Ordnungspartnerschaft",
+               a(href = "https://www.sicher-durch-muenster.de/",
+                  target = "_blank",
+                  em("Sicher durch Münster")),
+               "die für eine Reduktion von Verkehrsunfällen sorgen sollte, verringert
+               sich die hohe Unfallanzahl seit über 10 Jahren nicht, teilweise stieg sie sogar an."),
+            p("Was steckt hinter dieser Entwicklung? Bei welchen Unfallarten kann
+               man von einer Verbesserung der Lage sprechen, bei welchen muss man
+               von einer Verschlechterung sprechen? Wo könnten welche Maßnahmen für
+               eine Unfallreduktion sorgen? Welche Maßnahmen sind teuer aber wirkungslos?"),
+            p("Solche Fragen werden seit Jahren von der interessierten Stadtöffentlichkeit,
+               insbesondere durch BefürworterInnen des Radverkehrs gestellt (z.B. ADFC).
+               Sie lassen sich auch teilweise durch die von der Polizei Münster gesammelten
+               Unfalldaten beantworten. Dazu musste man sich bisher jedoch entweder
+               auf die polizeiliche Interpretation verlassen oder sich durch große
+               Excel-Tabellen an Rohdaten wühlen."),
+            p("Um es der interessierten Stadtöffentlichkeit zu ermöglichen,
+               faktenbasiert an der Diskussion teilzunehmen, haben wir von ", 
+               a(href = "https://codeformuenster.org",
+                  target = "_blank",
+                  em("Code For Münster")),
+               "diese interaktive räumliche Unfalldatenvisualisierung
+               erstellt."),
+            p("Letztlich können mithilfe dieses Projekt zivilgesellschaftliche
+               Organisationen sowohl Fragen nach Unfallschwerpunkten neu bewerten
+               als auch Trends in den Daten offenlegen, die von der
+               Ordnungspartnerschaft", em("Sicher durch Münster"), "so bisher nicht
+               entdeckt oder kommuniziert wurden."),
+            h4("Weitere Informationen"),
+               p("Die", em("Westfälischen Nachrichten"), "haben ",
+               a(href = "https://www.wn.de/Muenster/Stadtteile/Hiltrup/4007359-Interaktive-Unfallkarte-zeigt-Gefahrenpunkte-in-Hiltrup-Hier-kracht-es-am-Haeufigsten",
+               target = "_blank",
+               "einen Bericht über unser Projekt"), 
+               "geschrieben. Folien eines Vortrages auf dem ",
+               em("Forum Citizen Science"), "mit weiteren Infos und Quellen zum Projekt ", 
+               a(href = "https://github.com/codeformuenster/crashes-shiny/blob/master/doc/vortrag_forum_citizen_science_september_2019/PVI_Terstiege_SichererRadfahren_26Sep.pdf",
+                  target = "_blank",
+                  "finden sich hier"),
+               "."),
+            h3("Datenquelle"),
             p("Dank einer Anfrage bei der Polizei Münster über ",
               a(href = "https://fragdenstaat.de/anfrage/rohdaten-der-verkehrsunfallstatistik-munster/",
                 target = "_blank",
@@ -38,7 +80,7 @@ ui <- navbarPage(
               a(href = "https://github.com/codeformuenster/open-data/tree/master/Unfallstatistiken",
                 target = "_blank",
                 "hier herunterladen.")),
-            h4("Lizenz des Quelltexts"),
+            h3("Lizenz des Quelltexts"),
             p("Ein Projekt von ",
               a(href = "https://codeformuenster.org", target = "_blank", img(src = "cfm_logo.png", alt = "Code for Münster."))),
             p("Lizenziert unter der ",
@@ -48,15 +90,13 @@ ui <- navbarPage(
             p("Ideen und Feedback willkommen!",
               a(href = "https://github.com/codeformuenster/crashes-shiny/issues", target = "_blank", "Zum Beispiel auf github"),
               " oder ", a(href = "mailto:muenster@codefor.de", target = "_blank", "per e-Mail.")),
+            a(href = "https://codeformuenster.org/impressum/",
+              "Impressum & Datenschutzerklärung"),
             # whitespace to move filters below (nicht schön, aber selten!)
             br(), br(), br(), br(), br(), br(), br(), br(), br(), br(), br(), br(),
             br(), br(), br(), br(), br(), br(), br(), br(), br(), br(), br(), br(),
             br(), br(), br(), br(), br(), br(), br(), br(), br(), br(), br(), br()
             ), # end tabPanel about
-   
-   tabPanel("Impressum & Datenschutz",
-           includeMarkdown("impressum-datenschutz.md")
-   ),
    
    fluidRow(
      column(3,
@@ -225,6 +265,9 @@ ui <- navbarPage(
      ), # end fluidRow (filter)
    
    tags$head(tags$link(rel = "shortcut icon", href = "favicon.ico")),
+   
+   a(href = "https://codeformuenster.org/impressum/",
+      "Impressum & Datenschutzerklärung"),
    
    tags$script(src = "https://assets.digitalclimatestrike.net/widget.js", async = NA),
    
