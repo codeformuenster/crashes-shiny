@@ -1,9 +1,13 @@
 library(shiny)
+library(plotly)
 
 # Define server logic required to draw the map
 server <- function(input, output, session) {
   
-  global_vars = reactiveValues(years_button_toggle = TRUE, filter_changed = FALSE, update_visible_data = TRUE)
+  global_vars = reactiveValues(years_button_toggle = TRUE,
+                               filter_changed = FALSE,
+                               update_visible_data = TRUE,
+                               crashes_static = NULL)
 
   # open connection to database
   db_con <- dbConnect(RPostgres::Postgres(), dbname = "postgres",
@@ -19,6 +23,8 @@ server <- function(input, output, session) {
   })
   
   crashes_filtered <- eventReactive(global_vars$update_visible_data, ignoreInit = TRUE, {
+    
+    crashes_static <- NULL
     
     # de-validate map
     # filtered <- NULL
@@ -679,10 +685,116 @@ server <- function(input, output, session) {
       write.csv(crashes_filtered(), file, row.names = FALSE, fileEncoding = "UTF-8")
     }
   )
+
+  NullPlot <- ggplotly(
+    ggplot(NULL) +
+      annotate(
+        geom = "text",
+        x = 0,
+        y = 0,
+        label = "Keine Daten vorhanden. Bitte Auswahl ändern.",
+        hjust = 0
+      ) + theme_void()
+  )
+
+  observe({
+    global_vars$crashes_static <- crashes_filtered()
+  })
+
+  aggregrated_data_hour <- reactive({
+    
+    crashes_hour <-
+      global_vars$crashes_static %>%
+      group_by(year, hour) %>%
+      summarise(count_hour = n()) %>%
+      mutate(year_character = paste0(year)) %>%
+      ungroup()
+
+    return(crashes_hour)
+  })
+
+  output$plotTime <- renderPlotly({
+
+    if (is.null(aggregrated_data_hour()) || nrow(aggregrated_data_hour()) == 0) {
+      p <- NullPlot
+    } else {
+      p <- plot_ly(data = aggregrated_data_hour(),
+                   x = ~hour,
+                   y = ~count_hour,
+                   type = "scattergl",
+                   mode = "lines+markers",
+                   color = ~year_character,
+                   name = ~year_character,
+                   hoverinfo = "text",
+             text = ~paste0(year, ", ", hour, " Uhr, ", count_hour, " Unfälle")) %>%
+            layout(xaxis = list(title = "Uhrzeit"),
+                   yaxis = list(title = "Anzahl"),
+                   legend = list(x = 0.1, y = 0.9),
+                   showlegend = TRUE
+                  ) %>%
+            config(plot_ly(), displayModeBar = T, collaborate = F, displaylogo = F, locale = 'de')
+  	}
+  })
+  
+  aggregrated_data_vehicle <- reactive({
+
+    # if_else(car_causer_filter, " (data->>'participants_01' in ('21', '22', '25'))", ""),
+    # if_else(ped_causer_filter," (data->>'participants_01' in ('81', '84', '93'))", ""),
+    # if_else(bike_causer_filter, " (data->>'participants_01' in ('71', '72', '03'))", ""),
+    # if_else(truck_causer_filter,
+    # " (data->>'participants_01' in ('40', '42', '44', '46', '43', '48', '51', '52', '53', '54', '55', '57', '58'))", ""),
+    # if_else(bus_causer_filter, " (data->>'participants_01' in ('31', '32', '33', '34', '35'))", ""),
+
+    crashes_vehicle <-
+      global_vars$crashes_static %>%
+      mutate(causer_human =
+               if_else(participants_01 %in% c(21, 22, 25), "PKW",
+                      if_else(participants_01 %in% c(81, 84, 93), "Fuß",
+                              if_else(participants_01 %in% c(71, 72, 03), "Fahrrad",
+                                      if_else(participants_01 %in% c(40, 42, 44, 46, 43, 48, 51, 52, 53, 54, 55, 57, 58), "LKW",
+                                              if_else(participants_01 %in% c(31, 32, 33, 34, 35), "Bus", "sonstige")))))) %>%
+
+      mutate(victim_human =
+               if_else(participants_02 %in% c(21, 22, 25), "PKW",
+                      if_else(participants_02 %in% c(81, 84, 93), "Fuß",
+                              if_else(participants_02 %in% c(71, 72, 03), "Fahrrad",
+                                      if_else(participants_02 %in% c(40, 42, 44, 46, 43, 48, 51, 52, 53, 54, 55, 57, 58), "LKW",
+                                              if_else(participants_02 %in% c(31, 32, 33, 34, 35), "Bus", "sonstige")))))) %>%
+      group_by(causer_human, victim_human) %>%
+      summarise(count_causer = n()) %>%
+      ungroup()
+
+    return(crashes_vehicle)
+  })
+  
+  output$plotVehicle <- renderPlotly({
+ 	  
+    if (is.null(aggregrated_data_vehicle()) || nrow(aggregrated_data_vehicle()) == 0) {
+      p <- NullPlot
+    } else {
+      p <- plot_ly(data = aggregrated_data_vehicle(),
+                   x = ~causer_human,
+                   y = ~count_causer,
+                   type = "bar",
+                   mode = "lines+markers",
+                   color =  ~victim_human,
+                   name = ~victim_human,
+                   hoverinfo = "text",
+                   text = ~paste0(count_causer, " Unfälle mit ", victim_human, " verursacht.")) %>%
+            add_annotations(text = "GeschädigterR", xref = "paper", yref = "paper",
+                            x = 0.12, y = 0.93, showarrow = FALSE ) %>%
+            layout(xaxis = list(title = "HauptverursacherIn (lt. Polizei)"),
+                   yaxis = list(title = "Anzahl"),
+                   legend = list(x = 0.1, y = 0.9),
+                   showlegend = TRUE) %>%
+           config(plot_ly(), displayModeBar = T, collaborate = F, displaylogo = F,locale = 'de')
+    }
+  })
   
   output$crashes_table <- DT::renderDataTable({
     DT::datatable(crashes_filtered())
   })
+  
 }
 
 

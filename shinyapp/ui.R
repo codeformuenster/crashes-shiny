@@ -2,6 +2,7 @@ library(shiny)
 library(leaflet)
 library(leaflet.extras)
 library(shinycssloaders)
+library(plotly)
 
 # define type of loading animation
 options("spinner.type" = 4)
@@ -14,6 +15,14 @@ ui <- navbarPage(
             p("Tipp: Zum Filtern der Daten unter die Karte scrollen. Datenquelle: Polizei Münster (Achtung: Datensatz noch nicht ganz vollständig)."),
             withSpinner(leafletOutput("karte", height = "600"))
             ), # end tabPanel Karte
+   
+   tabPanel("Interaktive Grafiken",
+            fluidRow(
+               column(6, "Anzahl Unfälle im Tagesverlauf", withSpinner(plotlyOutput("plotTime"))),
+               column(6, "HauptverursacherIn vs. GeschädigteR", withSpinner(plotlyOutput("plotVehicle")))
+            ),
+            fluidRow(column(12, align = "center", p("Tipp: Filter benutzen, um Grafiken anzupassen!")))
+   ),
    
    tabPanel("Rohdaten",
             p("Tipp: Zum Filtern der Daten unter die Tabelle scrollen. Datenquelle: Polizei Münster (Achtung: Datensatz noch nicht ganz vollständig). Die Originaldaten lassen sich als Excel-Dateien", a(href = "https://github.com/codeformuenster/open-data/tree/master/Unfallstatistiken", target = "_blank", "hier (Ordner Rohdaten) herunterladen."), "Gefilterte Teilmengen lassen sich mit dem Knopf unten rechts herunterladen."),
