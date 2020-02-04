@@ -721,8 +721,7 @@ server <- function(input, output, session) {
       p <- plot_ly(data = aggregrated_data_hour(),
                    x = ~hour,
                    y = ~count_hour,
-                   type = "scattergl",
-                   mode = "lines+markers",
+                   type = "bar",
                    color = ~year_character,
                    name = ~year_character,
                    hoverinfo = "text",
@@ -732,7 +731,7 @@ server <- function(input, output, session) {
                    legend = list(x = 0.1, y = 0.9),
                    showlegend = TRUE
                   ) %>%
-            config(plot_ly(), displayModeBar = T, collaborate = F, displaylogo = F, locale = 'de')
+            config(plot_ly(), displayModeBar = T, displaylogo = F, locale = 'de')
   	}
   })
   
@@ -774,20 +773,23 @@ server <- function(input, output, session) {
     } else {
       p <- plot_ly(data = aggregrated_data_vehicle(),
                    x = ~causer_human,
-                   y = ~count_causer,
-                   type = "bar",
-                   mode = "lines+markers",
-                   color =  ~victim_human,
-                   name = ~victim_human,
+                   y = ~victim_human,
+                   z = ~count_causer,
+                   type = "heatmap",
                    hoverinfo = "text",
-                   text = ~paste0(count_causer, " Unfälle mit ", victim_human, " verursacht.")) %>%
-            add_annotations(text = "GeschädigterR", xref = "paper", yref = "paper",
-                            x = 0.12, y = 0.93, showarrow = FALSE ) %>%
+                   text = ~paste0(causer_human, " hat ", count_causer, " Unfälle mit ", victim_human, " verursacht.")) %>%
+            add_annotations(x = ~causer_human,
+                            y = ~victim_human,
+                            text = ~paste0(count_causer),
+                            showarrow = FALSE,
+                            bgcolor = "lightgrey",
+                            font = list(color = "black")) %>%
             layout(xaxis = list(title = "HauptverursacherIn (lt. Polizei)"),
-                   yaxis = list(title = "Anzahl"),
+                   yaxis = list(title = "GeschädigteR"),
                    legend = list(x = 0.1, y = 0.9),
                    showlegend = TRUE) %>%
-           config(plot_ly(), displayModeBar = T, collaborate = F, displaylogo = F,locale = 'de')
+            colorbar(title = "Anzahl Unfälle") %>%
+            config(plot_ly(), displayModeBar = T, displaylogo = F, locale = 'de')
     }
   })
   
