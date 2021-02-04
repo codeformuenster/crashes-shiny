@@ -277,9 +277,7 @@ ui <- navbarPage(
    
    a(href = "https://codeformuenster.org/impressum/",
       "Impressum & Datenschutzerklärung"),
-   
-   tags$script(src = "https://assets.digitalclimatestrike.net/widget.js", async = NA),
-   
+ 
    tags$script(HTML(paste0("(function(f, a, t, h, o, m){",
                   "a[h]=a[h]||function(){",
                   "(a[h].q=a[h].q||[]).push(arguments)",
